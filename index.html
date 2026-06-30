@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commodore GL-976M — Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* Seven-segment VFD font (digits built from the 7 lit bars) */
+  @font-face{
+    font-family:'DSEG7';
+    src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2'),
+        url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff') format('woff');
+    font-weight:bold;font-style:normal;font-display:swap;
+  }
+  :root{
+    --vfd:#7dffb0;            /* glowing green VFD */
+    --vfd-dim:#1d3528;
+    --body:#d9d2c4;          /* cream plastic */
+    --body-dark:#b9b0a0;
+    --silver:#c9ccd1;
+    --silver-dk:#8e9197;
+    --trim:#3a3a3c;
+    --blue:#5b9bd1;          /* Green Line blue keys */
+    --blue-dk:#3f7cb0;
+    --red:#c1402f;           /* the red C key */
+    --red-dk:#8f2c1f;
+    --key:#3b3b3d;
+    --key-light:#e7e3da;
+    --paper:#fffdf3;
+    --line:#cfe3ee;
+    --ink:#3a4a8c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Share Tech Mono',monospace;
+    background:
+      radial-gradient(circle at 50% 0%, #5a4632 0%, #3c2e20 60%, #2a2017 100%);
+    color:#222;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  header.top{
+    text-align:center;
+    color:#e9dcc4;
+    padding:18px 10px 4px;
+    letter-spacing:2px;
+  }
+  header.top .sub{font-size:12px;color:#b9a888;letter-spacing:3px;}
+
+  .stage{
+    flex:1;
+    display:grid;
+    grid-template-columns:1fr minmax(300px,360px) 1fr;
+    gap:22px;
+    align-items:stretch;
+    padding:18px 26px 34px;
+    max-width:1200px;
+    margin:0 auto;
+    width:100%;
+  }
+
+  /* ---------- Notepads ---------- */
+  .pad{
+    background:var(--paper);
+    border-radius:6px;
+    box-shadow:0 14px 34px rgba(0,0,0,.45), 0 2px 0 #d9d3c2 inset;
+    position:relative;
+    padding:54px 26px 26px 58px;
+    background-image:
+      repeating-linear-gradient(var(--paper) 0 31px, var(--line) 31px 32px);
+    background-position:0 54px;
+    overflow:hidden;
+    min-height:520px;
+  }
+  .pad::before{ /* red margin line */
+    content:"";position:absolute;top:0;bottom:0;left:42px;width:2px;
+    background:#e7a9a0;opacity:.8;
+  }
+  .pad::after{ /* punch holes feel via top tape */
+    content:"";position:absolute;top:0;left:0;right:0;height:30px;
+    background:linear-gradient(#efe9d6,#e4ddc8);
+    border-bottom:1px solid #d4cdb6;
+  }
+  .pad h2{
+    position:absolute;top:4px;left:58px;right:18px;margin:0;
+    font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:#9a6b2f;
+    line-height:30px;
+  }
+  .pad .scroll{
+    font-family:'Caveat',cursive;
+    font-size:23px;
+    line-height:32px;
+    color:var(--ink);
+    height:100%;
+    overflow-y:auto;
+    padding-right:6px;
+  }
+  .pad .scroll::-webkit-scrollbar{width:8px;}
+  .pad .scroll::-webkit-scrollbar-thumb{background:#d8cfb6;border-radius:4px;}
+
+  #history .entry{white-space:pre-wrap;}
+  #history .entry .res{color:#b5562a;}
+  #history .empty{color:#b3a98c;font-style:italic;}
+
+  #notes{outline:none;}
+  #notes:empty::before{
+    content:"Jot anything here… grocery math, phone numbers, doodly sums.";
+    color:#b3a98c;font-style:italic;
+  }
+  #notes .kap{
+    display:block;white-space:pre-wrap;margin:10px 0 6px;
+    color:#7a3f8c;                 /* purple ink for the magic */
+    border-top:1px dashed #d8cbe0;padding-top:6px;
+  }
+  #notes .kap .head{color:#b5562a;}
+  #notes .kap .win{color:#2f8a4f;}
+  #notes .perf{
+    display:block;white-space:pre-wrap;margin:10px 0 6px;
+    color:#9a6b1f;                 /* gold ink for perfect numbers */
+    border-top:1px dashed #e3d3a8;padding-top:6px;
+  }
+  #notes .perf .head{color:#b5562a;}
+  #notes .perf .win{color:#2f8a4f;}
+
+  /* ---------- Calculator ---------- */
+  .calc-wrap{display:flex;align-items:center;justify-content:center;}
+  .calc{
+    width:100%;
+    background-image:
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23g)' opacity='0.48'/></svg>"),
+      linear-gradient(180deg,var(--body) 0%,var(--body-dark) 100%);
+    background-size:140px 140px, auto;
+    border-radius:20px 20px 26px 26px;
+    padding:18px 18px 26px;
+    box-shadow:
+      0 22px 50px rgba(0,0,0,.55),
+      0 2px 0 #fff6 inset,
+      0 -10px 24px rgba(0,0,0,.18) inset;
+    border:1px solid #00000022;
+    position:relative;
+  }
+  .brand{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:2px 6px 12px;
+  }
+  /* Commodore "chicken-head" C logo */
+  .clogo{
+    width:26px;height:22px;position:relative;flex:0 0 auto;
+  }
+  .clogo .ring{
+    position:absolute;inset:0;border:4px solid #2a2d33;border-radius:50%;
+  }
+  .clogo .flag{
+    position:absolute;left:11px;top:4px;width:14px;height:14px;
+    background:#2a2d33;border-radius:0 7px 7px 0;
+  }
+  .brand .model{
+    font-size:11px;color:#5b5750;letter-spacing:2px;text-align:right;line-height:1.3;
+  }
+  .brand .model b{display:block;font-size:9px;color:#7a756c;letter-spacing:2px;}
+
+  /* VFD display */
+  .display{
+    background:#0a120d;
+    border-radius:8px;
+    margin:0 2px 16px;
+    padding:14px 16px;
+    border:3px solid #2c2c2e;
+    box-shadow:0 0 0 2px #b7b0a0 inset, 0 4px 10px #0008 inset;
+    position:relative;
+    overflow:hidden;
+  }
+  .display .mini{
+    position:relative;text-align:right;color:#3f7d5c;font-size:13px;
+    min-height:15px;letter-spacing:2px;margin-bottom:4px;
+  }
+  /* digit stage: bright value sits exactly on top of the dim 8s */
+  .digits{position:relative;height:50px;overflow:hidden;}
+  .digits .ghost,.digits .out{
+    position:absolute;top:0;left:0;right:0;
+    text-align:right;
+    font-family:'DSEG7','Share Tech Mono',monospace;
+    font-weight:bold;
+    font-size:36px;
+    line-height:50px;
+    letter-spacing:2px;
+    white-space:nowrap;
+  }
+  .digits .ghost{ /* all segments, dimly lit, like a real VFD */
+    color:var(--vfd-dim);user-select:none;pointer-events:none;
+  }
+  .digits .out{
+    color:var(--vfd);
+    text-shadow:0 0 6px #7dffb0aa,0 0 14px #2bff8855;
+  }
+
+  /* silver trim strip */
+  .trim{
+    height:8px;margin:0 2px 16px;border-radius:4px;
+    background:linear-gradient(180deg,var(--silver),var(--silver-dk));
+    box-shadow:0 1px 0 #fff8 inset,0 -1px 2px #0004 inset;
+  }
+
+  .keys{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  /* default = white number keys, like the real Green Line */
+  button.k{
+    font-family:'Share Tech Mono',monospace;
+    font-size:20px;
+    border:none;
+    border-radius:11px;
+    padding:16px 0;
+    cursor:pointer;
+    color:#33312c;
+    background:linear-gradient(180deg,#f3efe6,#d9d4c7);
+    box-shadow:0 3px 0 #a9a395,0 5px 8px #0004,0 1px 0 #fff inset;
+    transition:transform .04s ease, box-shadow .04s ease;
+    user-select:none;
+  }
+  button.k:active{transform:translateY(3px);box-shadow:0 0 0 #a9a395,0 2px 5px #0006 inset;}
+  /* function keys (% and ±) share the blue family */
+  button.k.fn{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
+  button.k.fn:active{box-shadow:0 0 0 #2f679a,0 2px 5px #0006 inset;}
+  button.k.op{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
+  button.k.op.active{outline:2px solid #fff;outline-offset:-4px;}
+  button.k.eq{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
+  /* red clear key */
+  button.k.clr{background:linear-gradient(180deg,#d4533f,var(--red-dk));color:#fff;box-shadow:0 3px 0 #6f1f15,0 5px 8px #0005,0 1px 0 #ffffff44 inset;}
+  button.k.clr:active{box-shadow:0 0 0 #6f1f15,0 2px 5px #0006 inset;}
+  button.k.zero{grid-column:span 1;}
+  .kspacer{visibility:hidden;}
+
+  .nameplate{
+    margin:18px auto 4px;
+    width:128px;height:24px;border-radius:4px;
+    background:linear-gradient(180deg,#26282c,#15161a);
+    box-shadow:0 1px 0 #fff2 inset,0 2px 4px #0006;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .nameplate span{
+    font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:#e9e6df;
+    letter-spacing:.5px;
+  }
+  .feet{
+    text-align:center;color:#7c7468;font-size:10px;letter-spacing:2px;
+    margin-top:8px;
+  }
+
+  footer.bot{
+    text-align:center;color:#8c7f64;font-size:12px;padding:6px 0 18px;
+  }
+  footer.bot a{color:#c7ab78;}
+
+  /* ---- Mobile: swipeable carousel, calculator in focus ---- */
+  @media (max-width:860px){
+    .stage{
+      display:flex;
+      grid-template-columns:none;
+      max-width:none;
+      gap:0;
+      padding:14px 0 26px;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    .stage::-webkit-scrollbar{display:none;}
+    .stage > section{
+      flex:0 0 88%;
+      scroll-snap-align:center;
+      padding:0 10px;
+    }
+    .calc-wrap{align-items:flex-start;}
+    .pad{min-height:64vh;}
+    .swipe-hint{display:block;}
+  }
+  .swipe-hint{display:none;text-align:center;color:#b9a888;font-size:12px;
+    letter-spacing:1px;padding:2px 0 6px;}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div style="font-size:15px;">G R E E N &nbsp; L I N E &nbsp; D E S K</div>
+    <div class="sub">EST. 1975</div>
+  </header>
+  <div class="swipe-hint">‹ swipe&nbsp;&nbsp;history · keys · notes&nbsp;&nbsp;swipe ›</div>
+
+  <main class="stage">
+    <!-- LEFT: history -->
+    <section class="pad left-pad">
+      <h2>~ history tape ~</h2>
+      <div class="scroll" id="history">
+        <div class="empty">Your sums will appear here…</div>
+      </div>
+    </section>
+
+    <!-- MIDDLE: calculator -->
+    <section class="calc-wrap">
+      <div class="calc" role="application" aria-label="Commodore GL-976M calculator">
+        <div class="brand">
+          <span class="clogo"><span class="ring"></span><span class="flag"></span></span>
+          <span class="model">CUSTOM<b>GREEN LINE</b></span>
+        </div>
+
+        <div class="display">
+          <div class="mini" id="mini"></div>
+          <div class="digits">
+            <div class="ghost">88888888</div>
+            <div class="out" id="out">0</div>
+          </div>
+        </div>
+
+        <div class="trim"></div>
+
+        <div class="keys" id="keys">
+          <button class="k fn" data-act="sign">±</button>
+          <button class="k fn" data-act="percent">%</button>
+          <span class="kspacer"></span>
+          <button class="k op" data-op="*">×</button>
+
+          <button class="k" data-num="7">7</button>
+          <button class="k" data-num="8">8</button>
+          <button class="k" data-num="9">9</button>
+          <button class="k op" data-op="/">÷</button>
+
+          <button class="k" data-num="4">4</button>
+          <button class="k" data-num="5">5</button>
+          <button class="k" data-num="6">6</button>
+          <button class="k op" data-op="-">−</button>
+
+          <button class="k" data-num="1">1</button>
+          <button class="k" data-num="2">2</button>
+          <button class="k" data-num="3">3</button>
+          <button class="k op" data-op="+">+</button>
+
+          <button class="k clr" data-act="clear">C</button>
+          <button class="k zero" data-num="0">0</button>
+          <button class="k" data-act="dot">.</button>
+          <button class="k eq" data-act="equals">=</button>
+        </div>
+
+        <div class="nameplate"><span>commodore</span></div>
+        <div class="feet">8 - DIGIT &nbsp;•&nbsp; VFD &nbsp;•&nbsp; MADE IN JAPAN</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: scratch notes -->
+    <section class="pad right-pad">
+      <h2>~ scratch pad ~</h2>
+      <div class="scroll" id="notes" contenteditable="true" spellcheck="false"></div>
+    </section>
+  </main>
+
+  <footer class="bot">
+    A loving tribute to the Commodore GL-976M (1975). Type on your keyboard or click the keys.
+    <br><span style="opacity:.8;">✦ Secrets: press = on a 4-digit number for Kaprekar's routine (→ 6174), or on a perfect number (6, 28, 496, 8128…) to see why it's perfect.</span>
+  </footer>
+
+<script>
+(function(){
+  const MAX = 8; // 8-digit display like the real thing
+  const outEl = document.getElementById('out');
+  const miniEl = document.getElementById('mini');
+  const histEl = document.getElementById('history');
+
+  let current = '0';     // string shown
+  let stored = null;     // number held
+  let op = null;         // pending operator
+  let freshEntry = true; // next digit starts a new number
+  let lastOp = null, lastArg = null; // for repeated "="
+  let errored = false;
+
+  const opSym = {'+':'+','-':'−','*':'×','/':'÷'};
+
+  function fmt(nStr){
+    // nStr is a string number; clamp to MAX significant digits
+    let n = Number(nStr);
+    if(!isFinite(n)) return 'Error';
+    if(Math.abs(n) >= 1e8){ return 'Error'; } // overflow like a real 8-digit unit
+    // limit total digits to 8
+    let s = nStr;
+    if(s.indexOf('.')>=0){
+      const digits = s.replace('-','').replace('.','').length;
+      if(digits>MAX){
+        const intDigits = Math.trunc(Math.abs(n)).toString().length;
+        const dec = Math.max(0, MAX-intDigits);
+        s = n.toFixed(dec);
+        s = s.replace(/\.?0+$/,''); // trim trailing zeros
+      }
+    }
+    return s;
+  }
+
+  function render(){
+    outEl.textContent = current;
+    miniEl.textContent = (stored!==null && op) ? (fmt(String(stored))+' '+opSym[op]) : '';
+    // highlight active operator
+    document.querySelectorAll('button.op').forEach(b=>b.classList.remove('active'));
+    if(op){ const b=document.querySelector(`button[data-op="${op}"]`); if(b) b.classList.add('active'); }
+  }
+
+  function setError(){
+    current='Error'; errored=true; stored=null; op=null; freshEntry=true; render();
+  }
+
+  function inputDigit(d){
+    if(errored) clearAll();
+    if(freshEntry){ current = (d==='0')?'0':d; freshEntry=false; }
+    else{
+      if(current==='0') current = d;
+      else{
+        const len = current.replace('-','').replace('.','').length;
+        if(len>=MAX) return;
+        current += d;
+      }
+    }
+    render();
+  }
+
+  function inputDot(){
+    if(errored) clearAll();
+    if(freshEntry){ current='0.'; freshEntry=false; }
+    else if(current.indexOf('.')<0) current += '.';
+    render();
+  }
+
+  function toggleSign(){
+    if(errored) return;
+    if(current==='0') return;
+    current = current.startsWith('-') ? current.slice(1) : '-'+current;
+    render();
+  }
+
+  function percent(){
+    if(errored) return;
+    let val = Number(current);
+    // percent of the stored operand if mid-operation, else of itself
+    if(stored!==null && op){ val = stored * (val/100); }
+    else { val = val/100; }
+    current = fmt(String(val));
+    freshEntry = true;
+    render();
+  }
+
+  function compute(a,b,o){
+    switch(o){
+      case '+':return a+b;
+      case '-':return a-b;
+      case '*':return a*b;
+      case '/':return b===0?NaN:a/b;
+    }
+  }
+
+  function logHistory(expr,result){
+    const empty = histEl.querySelector('.empty');
+    if(empty) empty.remove();
+    const div = document.createElement('div');
+    div.className='entry';
+    div.innerHTML = expr+' =\n   '+'<span class="res">'+result+'</span>';
+    histEl.appendChild(div);
+    histEl.scrollTop = histEl.scrollHeight;
+  }
+
+  function setOp(nextOp){
+    if(errored) return;
+    const val = Number(current);
+    if(op && !freshEntry){
+      // chain: evaluate pending first
+      const r = compute(stored, val, op);
+      if(!isFinite(r) || Math.abs(r)>=1e8){ setError(); return; }
+      stored = Number(fmt(String(r)));
+      current = fmt(String(r));
+    } else if(stored===null){
+      stored = val;
+    } else {
+      stored = val; // replaced operator without new entry
+    }
+    op = nextOp;
+    freshEntry = true;
+    render();
+  }
+
+  // ---- Kaprekar's routine easter egg ----
+  function kaprekarEligible(str){
+    if(str.indexOf('.')>=0 || str.startsWith('-')) return false;
+    const n = parseInt(str,10);
+    if(isNaN(n) || n<1000 || n>9999) return false;
+    return new Set(String(n)).size>1;       // not a repdigit (1111, 2222…)
+  }
+
+  function runKaprekar(){
+    const n = parseInt(current,10);
+    const steps = [];
+    let cur = n, guard = 0;
+    while(cur!==6174 && guard<12){
+      const d = String(cur).padStart(4,'0').split('').map(Number);
+      const desc = d.slice().sort((a,b)=>b-a).join('');
+      const asc  = d.slice().sort((a,b)=>a-b).join('');
+      const diff = parseInt(desc,10) - parseInt(asc,10);
+      const diffStr = String(diff).padStart(4,'0');
+      steps.push([desc, asc, diffStr]);
+      if(diff===0) break;
+      cur = diff; guard++;
+    }
+    writeKaprekarNote(n, steps);
+    current = '6174'; stored=null; op=null; freshEntry=true; render();
+    scrollToNotes();
+  }
+
+  function writeKaprekarNote(n, steps){
+    const notes = document.getElementById('notes');
+    const block = document.createElement('div');
+    block.className = 'kap';
+    let html = '<span class="head">✦ Kaprekar · '+n+'</span>\n';
+    if(steps.length===0){
+      html += 'already 6174 — the magic constant!';
+    } else {
+      steps.forEach((s,i)=>{
+        const win = s[2]==='6174';
+        html += (i+1)+') '+s[0]+' − '+s[1]+' = '
+              + (win ? '<span class="win">'+s[2]+'  ✓</span>' : s[2]) + '\n';
+      });
+      html += '↳ reached 6174 in '+steps.length+(steps.length===1?' step':' steps')+'!';
+    }
+    block.innerHTML = html;
+    notes.appendChild(block);
+    notes.scrollTop = notes.scrollHeight;
+  }
+
+  function scrollToNotes(){
+    const stage = document.querySelector('.stage');
+    if(window.matchMedia('(max-width:860px)').matches){
+      const pad = document.querySelector('.right-pad');
+      const target = pad.offsetLeft-(stage.clientWidth-pad.clientWidth)/2;
+      stage.scrollTo({left:Math.max(0,target),behavior:'smooth'});
+    }
+  }
+
+  // ---- Perfect-number easter egg ----
+  // returns sorted proper divisors if n is perfect, else null
+  function perfectDivisors(str){
+    if(str.indexOf('.')>=0 || str.startsWith('-')) return null;
+    const n = parseInt(str,10);
+    if(isNaN(n) || n<2) return null;
+    let sum = 1, divs = [1];
+    for(let i=2; i*i<=n; i++){
+      if(n%i===0){
+        const j = n/i;
+        divs.push(i); sum += i;
+        if(j!==i){ divs.push(j); sum += j; }
+      }
+    }
+    if(sum===n){ divs.sort((a,b)=>a-b); return divs; }
+    return null;
+  }
+
+  function runPerfect(divs){
+    const n = parseInt(current,10);
+    writePerfectNote(n, divs);
+    freshEntry = true; render();
+    scrollToNotes();
+  }
+
+  function writePerfectNote(n, divs){
+    const order = {6:'1st',28:'2nd',496:'3rd',8128:'4th',33550336:'5th'};
+    const notes = document.getElementById('notes');
+    const block = document.createElement('div');
+    block.className = 'perf';
+    let html = '<span class="head">✦ Perfect · '+n+'</span>\n';
+    html += divs.join(' + ')+' = <span class="win">'+n+'  ✓</span>\n';
+    html += n+' equals the sum of its own divisors';
+    if(order[n]) html += '\n('+order[n]+' perfect number)';
+    block.innerHTML = html;
+    notes.appendChild(block);
+    notes.scrollTop = notes.scrollHeight;
+  }
+
+  function equals(){
+    if(errored) return;
+    // lone-number easter eggs (perfect numbers take priority over Kaprekar)
+    if(!op && lastOp===null){
+      const divs = perfectDivisors(current);
+      if(divs){ runPerfect(divs); return; }
+      if(kaprekarEligible(current)){ runKaprekar(); return; }
+    }
+    let a,b,o;
+    if(op){
+      a = stored; b = Number(current); o = op;
+      lastOp = op; lastArg = b;
+    } else if(lastOp!==null){
+      a = Number(current); b = lastArg; o = lastOp; // repeat last op on =
+    } else {
+      return;
+    }
+    const r = compute(a,b,o);
+    if(!isFinite(r) || Math.abs(r)>=1e8){ logHistory(fmt(String(a))+' '+opSym[o]+' '+fmt(String(b)), 'Error'); setError(); return; }
+    const rStr = fmt(String(r));
+    logHistory(fmt(String(a))+' '+opSym[o]+' '+fmt(String(b)), rStr);
+    current = rStr;
+    stored = null;
+    op = null;
+    freshEntry = true;
+    render();
+  }
+
+  function clearAll(){
+    current='0'; stored=null; op=null; freshEntry=true; errored=false;
+    lastOp=null; lastArg=null;
+    render();
+  }
+
+  // click handling
+  document.getElementById('keys').addEventListener('click',e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    if(b.dataset.num!==undefined) inputDigit(b.dataset.num);
+    else if(b.dataset.op) setOp(b.dataset.op);
+    else switch(b.dataset.act){
+      case 'dot':inputDot();break;
+      case 'sign':toggleSign();break;
+      case 'percent':percent();break;
+      case 'clear':clearAll();break;
+      case 'equals':equals();break;
+    }
+  });
+
+  // keyboard handling
+  window.addEventListener('keydown',e=>{
+    // don't hijack typing in the notes pad
+    if(document.activeElement && document.activeElement.id==='notes') return;
+    const k = e.key;
+    if(k>='0'&&k<='9'){ inputDigit(k); e.preventDefault(); }
+    else if(k==='.'){ inputDot(); e.preventDefault(); }
+    else if(k==='+'||k==='-'||k==='*'||k==='/'){ setOp(k); e.preventDefault(); }
+    else if(k==='Enter'||k==='='){ equals(); e.preventDefault(); }
+    else if(k==='%'){ percent(); e.preventDefault(); }
+    else if(k==='Escape'||k==='c'||k==='C'){ clearAll(); e.preventDefault(); }
+    else if(k==='Backspace'){
+      if(!freshEntry && !errored){
+        current = current.length<=1 || (current.length===2&&current.startsWith('-')) ? '0' : current.slice(0,-1);
+        if(current===''||current==='-') current='0';
+        render();
+      }
+      e.preventDefault();
+    }
+  });
+
+  render();
+
+  // On phones the layout is a swipe carousel — start centered on the calculator.
+  function centerCalc(){
+    const stage=document.querySelector('.stage');
+    if(window.matchMedia('(max-width:860px)').matches){
+      const calc=document.querySelector('.calc-wrap');
+      const target=calc.offsetLeft-(stage.clientWidth-calc.clientWidth)/2;
+      stage.scrollLeft=Math.max(0,target);
+    }
+  }
+  window.addEventListener('load',centerCalc);
+  window.addEventListener('resize',centerCalc);
+  window.addEventListener('orientationchange',()=>setTimeout(centerCalc,250));
+  centerCalc();
+})();
+</script>
+</body>
+</html>
