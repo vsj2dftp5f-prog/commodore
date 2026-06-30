@@ -241,6 +241,7 @@
     box-shadow:0 3px 0 #a9a395,0 5px 8px #0004,0 1px 0 #fff inset;
     transition:transform .04s ease, box-shadow .04s ease;
     user-select:none;
+    touch-action:manipulation;        /* iOS: no double-tap-to-zoom on keys */
   }
   button.k:active{transform:translateY(3px);box-shadow:0 0 0 #a9a395,0 2px 5px #0006 inset;}
   /* function keys (% and ±) share the blue family */
@@ -481,7 +482,7 @@
     if(empty) empty.remove();
     const div = document.createElement('div');
     div.className='entry';
-    div.innerHTML = expr+' =\n   '+'<span class="res">'+result+'</span>';
+    div.innerHTML = expr+' = '+'<span class="res">'+result+'</span>';
     histEl.appendChild(div);
     histEl.scrollTop = histEl.scrollHeight;
   }
