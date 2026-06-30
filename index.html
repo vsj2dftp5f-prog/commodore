@@ -33,8 +33,8 @@
     font-weight:400;font-style:normal;font-display:swap;
   }
   :root{
-    --vfd:#7dffb0;            /* glowing green VFD */
-    --vfd-dim:#1d3528;
+    --vfd:#8affc8;            /* glowing green VFD */
+    --vfd-dim:#13251b;
     --body:#d9d2c4;          /* cream plastic */
     --body-dark:#b9b0a0;
     --silver:#c9ccd1;
@@ -150,16 +150,23 @@
     width:100%;
     background-image:
       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23g)' opacity='0.48'/></svg>"),
-      linear-gradient(180deg,var(--body) 0%,var(--body-dark) 100%);
+      linear-gradient(166deg,#e8e2d4 0%,var(--body) 26%,var(--body-dark) 100%);
     background-size:140px 140px, auto;
-    border-radius:20px 20px 26px 26px;
-    padding:18px 18px 26px;
+    border-radius:18px 18px 30px 30px / 22px 22px 42px 42px;
+    padding:20px 20px 30px;
     box-shadow:
-      0 22px 50px rgba(0,0,0,.55),
-      0 2px 0 #fff6 inset,
-      0 -10px 24px rgba(0,0,0,.18) inset;
-    border:1px solid #00000022;
+      0 30px 64px rgba(0,0,0,.62),
+      0 9px 0 #9b9383,                 /* thick wedge side-wall */
+      0 2px 1px #fffa inset,
+      0 -16px 32px rgba(0,0,0,.15) inset,
+      0 1px 0 #fffd inset;
+    border:1px solid #00000026;
     position:relative;
+  }
+  .calc::before{ /* glossy top sheen on the plastic */
+    content:"";position:absolute;left:14px;right:14px;top:8px;height:30px;
+    border-radius:14px;pointer-events:none;
+    background:linear-gradient(180deg,#ffffff5c,#ffffff00);
   }
   .brand{
     display:flex;align-items:center;justify-content:space-between;
@@ -167,15 +174,21 @@
   }
   /* Commodore "chicken-head" C logo */
   .clogo{
-    width:26px;height:22px;position:relative;flex:0 0 auto;
+    width:24px;height:24px;position:relative;flex:0 0 auto;
   }
+  /* letter C: a ring open toward the right */
   .clogo .ring{
-    position:absolute;inset:0;border:4px solid #2a2d33;border-radius:50%;
+    position:absolute;inset:0;border:3.5px solid #2a2d33;border-radius:50%;
+    border-right-color:transparent;
+    transform:rotate(-34deg);
   }
-  .clogo .flag{
-    position:absolute;left:11px;top:4px;width:14px;height:14px;
-    background:#2a2d33;border-radius:0 7px 7px 0;
+  /* two small bars through the C, like the € mark */
+  .clogo .bar{
+    position:absolute;left:-1px;width:17px;height:3px;border-radius:2px;
+    background:#2a2d33;
   }
+  .clogo .bar1{top:8px;}
+  .clogo .bar2{top:13px;}
   .brand .model{
     font-size:11px;color:#5b5750;letter-spacing:2px;text-align:right;line-height:1.3;
   }
@@ -183,14 +196,30 @@
 
   /* VFD display */
   .display{
-    background:#0a120d;
-    border-radius:8px;
-    margin:0 2px 16px;
-    padding:14px 16px;
-    border:3px solid #2c2c2e;
-    box-shadow:0 0 0 2px #b7b0a0 inset, 0 4px 10px #0008 inset;
+    background:
+      radial-gradient(120% 150% at 50% -25%, #18271d 0%, #0a120d 55%, #040805 100%);
+    border-radius:10px;
+    margin:2px 2px 18px;
+    padding:16px 18px;
+    border:2px solid #161618;
+    box-shadow:
+      0 0 0 3px #9c947f inset,         /* inner metal frame */
+      0 0 0 4px #6e6756,
+      0 7px 16px #000b inset,
+      0 1px 0 #fff8;                    /* highlight beneath frame */
     position:relative;
     overflow:hidden;
+  }
+  .display::before{ /* smoked-acrylic diagonal glare in front of the VFD */
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+    background:linear-gradient(108deg,
+      rgba(255,255,255,.12) 0%,
+      rgba(255,255,255,.04) 16%,
+      transparent 36%, transparent 100%);
+  }
+  .display::after{ /* tube vignette */
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+    box-shadow:0 0 46px 12px #000b inset;
   }
   .display .mini{
     position:relative;text-align:right;color:#3f7d5c;font-size:13px;
@@ -218,9 +247,12 @@
 
   /* silver trim strip */
   .trim{
-    height:8px;margin:0 2px 16px;border-radius:4px;
-    background:linear-gradient(180deg,var(--silver),var(--silver-dk));
-    box-shadow:0 1px 0 #fff8 inset,0 -1px 2px #0004 inset;
+    height:7px;margin:0 2px 16px;border-radius:4px;
+    background:
+      repeating-linear-gradient(90deg,#d2d5da 0 2px,#aab0b7 2px 4px),
+      linear-gradient(180deg,#eceef1,#8c9097);
+    background-blend-mode:overlay,normal;
+    box-shadow:0 1px 0 #fff inset,0 -2px 3px #0005 inset,0 1px 2px #0006;
   }
 
   .keys{
@@ -233,26 +265,36 @@
     font-family:'Share Tech Mono',monospace;
     font-size:20px;
     border:none;
-    border-radius:11px;
-    padding:16px 0;
+    border-radius:13px 13px 15px 15px;
+    padding:15px 0 17px;
     cursor:pointer;
-    color:#33312c;
-    background:linear-gradient(180deg,#f3efe6,#d9d4c7);
-    box-shadow:0 3px 0 #a9a395,0 5px 8px #0004,0 1px 0 #fff inset;
-    transition:transform .04s ease, box-shadow .04s ease;
+    color:#2c2a26;
+    background:radial-gradient(125% 85% at 50% 16%, #fcf9f2 0%, #ece7db 44%, #d2ccbd 100%);
+    box-shadow:
+      0 1px 0 #fff inset,
+      0 -3px 6px #00000018 inset,
+      0 4px 0 #a39c8c,                 /* sculpted key wall */
+      0 7px 11px #00000055;
+    transition:transform .05s ease, box-shadow .05s ease;
     user-select:none;
     touch-action:manipulation;        /* iOS: no double-tap-to-zoom on keys */
   }
-  button.k:active{transform:translateY(3px);box-shadow:0 0 0 #a9a395,0 2px 5px #0006 inset;}
+  button.k:active{transform:translateY(4px);box-shadow:0 0 0 #a39c8c,0 1px 0 #fff inset,0 2px 5px #0006 inset;}
   /* function keys (% and ±) share the blue family */
-  button.k.fn{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
-  button.k.fn:active{box-shadow:0 0 0 #2f679a,0 2px 5px #0006 inset;}
-  button.k.op{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
+  button.k.fn,button.k.op,button.k.eq{
+    color:#fff;
+    background:radial-gradient(125% 85% at 50% 16%, #84b8e0 0%, #5b9bd1 46%, #3f7cb0 100%);
+    box-shadow:0 1px 0 #ffffff55 inset,0 -3px 6px #00000026 inset,0 4px 0 #2f679a,0 7px 11px #00000055;
+  }
+  button.k.fn:active,button.k.op:active,button.k.eq:active{box-shadow:0 0 0 #2f679a,0 1px 0 #ffffff55 inset,0 2px 5px #0006 inset;}
   button.k.op.active{outline:2px solid #fff;outline-offset:-4px;}
-  button.k.eq{background:linear-gradient(180deg,#6aa6d6,var(--blue-dk));color:#fff;box-shadow:0 3px 0 #2f679a,0 5px 8px #0005,0 1px 0 #ffffff55 inset;}
   /* red clear key */
-  button.k.clr{background:linear-gradient(180deg,#d4533f,var(--red-dk));color:#fff;box-shadow:0 3px 0 #6f1f15,0 5px 8px #0005,0 1px 0 #ffffff44 inset;}
-  button.k.clr:active{box-shadow:0 0 0 #6f1f15,0 2px 5px #0006 inset;}
+  button.k.clr{
+    color:#fff;
+    background:radial-gradient(125% 85% at 50% 16%, #e46d56 0%, #c1402f 46%, #8f2c1f 100%);
+    box-shadow:0 1px 0 #ffffff44 inset,0 -3px 6px #00000030 inset,0 4px 0 #6f1f15,0 7px 11px #00000055;
+  }
+  button.k.clr:active{box-shadow:0 0 0 #6f1f15,0 1px 0 #ffffff44 inset,0 2px 5px #0006 inset;}
   button.k.zero{grid-column:span 1;}
   .kspacer{visibility:hidden;}
 
@@ -324,7 +366,7 @@
     <section class="calc-wrap">
       <div class="calc" role="application" aria-label="Commodore GL-976M calculator">
         <div class="brand">
-          <span class="clogo"><span class="ring"></span><span class="flag"></span></span>
+          <span class="clogo"><span class="ring"></span><span class="bar bar1"></span><span class="bar bar2"></span></span>
           <span class="model">CUSTOM<b>GREEN LINE</b></span>
         </div>
 
