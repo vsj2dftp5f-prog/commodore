@@ -72,11 +72,10 @@
   .stage{
     flex:1;
     display:grid;
-    grid-template-columns:1fr minmax(300px,360px) 1fr;
+    grid-template-columns:2fr 1fr;   /* note pad twice as wide as the calculator */
     gap:22px;
     align-items:stretch;
     padding:18px 26px 34px;
-    max-width:1200px;
     margin:0 auto;
     width:100%;
   }
@@ -135,31 +134,27 @@
     content:"note…";color:#9db3d6;
   }
 
-  #notes{outline:none;}
-  #notes:empty::before{
-    content:"Jot anything here… grocery math, phone numbers, doodly sums.";
-    color:#b3a98c;font-style:italic;
-  }
-  #notes .kap{
+  /* easter-egg blocks written straight onto the note pad */
+  #history .kap{
     display:block;white-space:pre-wrap;margin:10px 0 6px;
     color:#7a3f8c;                 /* purple ink for the magic */
     border-top:1px dashed #d8cbe0;padding-top:6px;
   }
-  #notes .kap .head{color:#b5562a;}
-  #notes .kap .win{color:#2f8a4f;}
-  #notes .perf{
+  #history .kap .head{color:#b5562a;}
+  #history .kap .win{color:#2f8a4f;}
+  #history .perf{
     display:block;white-space:pre-wrap;margin:10px 0 6px;
     color:#9a6b1f;                 /* gold ink for perfect numbers */
     border-top:1px dashed #e3d3a8;padding-top:6px;
   }
-  #notes .perf .head{color:#b5562a;}
-  #notes .perf .win{color:#2f8a4f;}
+  #history .perf .head{color:#b5562a;}
+  #history .perf .win{color:#2f8a4f;}
 
   /* ---------- Calculator ---------- */
   .calc-wrap{display:flex;align-items:center;justify-content:center;}
   .calc{
     width:100%;
-    max-width:340px;
+    max-width:380px;
     margin:0 auto;
     /* glossy black case like the real Custom Green Line handhelds */
     background-image:
@@ -354,7 +349,8 @@
   }
   footer.bot a{color:#c7ab78;}
 
-  /* ---- Mobile: swipeable carousel, calculator in focus ---- */
+  /* ---- Portrait / narrow screens: swipeable carousel, note pad and
+         calculator panels the same size ---- */
   @media (max-width:860px){
     .stage{
       display:flex;
@@ -386,12 +382,12 @@
     <div style="font-size:15px;">G R E E N &nbsp; L I N E &nbsp; D E S K</div>
     <div class="sub">EST. 1975</div>
   </header>
-  <div class="swipe-hint">‹ swipe&nbsp;&nbsp;history · keys · notes&nbsp;&nbsp;swipe ›</div>
+  <div class="swipe-hint">‹ swipe&nbsp;&nbsp;note pad · keys&nbsp;&nbsp;swipe ›</div>
 
   <main class="stage">
-    <!-- LEFT: history -->
+    <!-- LEFT: note pad (history + easter eggs) -->
     <section class="pad left-pad">
-      <h2>~ history tape ~</h2>
+      <h2>~ note pad ~</h2>
       <div class="scroll" id="history">
         <div class="empty">Your sums will appear here…</div>
       </div>
@@ -455,17 +451,11 @@
         <div class="feet">8 - DIGIT &nbsp;•&nbsp; VFD &nbsp;•&nbsp; MADE IN JAPAN</div>
       </div>
     </section>
-
-    <!-- RIGHT: scratch notes -->
-    <section class="pad right-pad">
-      <h2>~ scratch pad ~</h2>
-      <div class="scroll" id="notes" contenteditable="true" spellcheck="false"></div>
-    </section>
   </main>
 
   <footer class="bot">
     A loving tribute to the Commodore GL-997R (1975). Type on your keyboard or click the keys.
-    <br><span style="opacity:.8;">✦ Secrets: press = on a 4-digit number for Kaprekar's routine (→ 6174), or on a perfect number (6, 28, 496, 8128…) to see why it's perfect.</span>
+    <br><span style="opacity:.8;">✦ Secrets: press = on a 4-digit number for Kaprekar's routine (→ 6174), or on a perfect number (6, 28, 496, 8128…) to see why it's perfect. Press N to jot a note on your last sum, C to clean the pad &amp; calculator.</span>
   </footer>
 
 <script>
@@ -584,10 +574,7 @@
     sel.removeAllRanges();
     sel.addRange(range);
   }
-  histEl.addEventListener('click', e=>{
-    if(e.target.classList.contains('cmt')) return; // already editing
-    const entry = e.target.closest('.entry');
-    if(!entry) return;
+  function addNoteTo(entry){
     let cmt = entry.querySelector('.cmt');
     if(!cmt){
       cmt = document.createElement('span');
@@ -597,7 +584,22 @@
       entry.appendChild(cmt);
     }
     editComment(cmt);
+  }
+  histEl.addEventListener('click', e=>{
+    if(e.target.classList.contains('cmt')) return; // already editing
+    const entry = e.target.closest('.entry');
+    if(!entry) return;
+    addNoteTo(entry);
   });
+  // "n" — jump to the last calculation and start scribbling a note
+  function noteLastEntry(){
+    const entries = histEl.querySelectorAll('.entry');
+    if(!entries.length) return;
+    const last = entries[entries.length-1];
+    histEl.scrollTop = histEl.scrollHeight;
+    scrollToNotes();
+    addNoteTo(last);
+  }
   histEl.addEventListener('keydown', e=>{
     if(!e.target.classList.contains('cmt')) return;
     if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); }
@@ -658,7 +660,9 @@
   }
 
   function writeKaprekarNote(n, steps){
-    const notes = document.getElementById('notes');
+    const notes = histEl;
+    const empty = notes.querySelector('.empty');
+    if(empty) empty.remove();
     const block = document.createElement('div');
     block.className = 'kap';
     let html = '<span class="head">✦ Kaprekar · '+n+'</span>\n';
@@ -680,7 +684,7 @@
   function scrollToNotes(){
     const stage = document.querySelector('.stage');
     if(window.matchMedia('(max-width:860px)').matches){
-      const pad = document.querySelector('.right-pad');
+      const pad = document.querySelector('.left-pad');
       const target = pad.offsetLeft-(stage.clientWidth-pad.clientWidth)/2;
       stage.scrollTo({left:Math.max(0,target),behavior:'smooth'});
     }
@@ -713,7 +717,9 @@
 
   function writePerfectNote(n, divs){
     const order = {6:'1st',28:'2nd',496:'3rd',8128:'4th',33550336:'5th'};
-    const notes = document.getElementById('notes');
+    const notes = histEl;
+    const empty = notes.querySelector('.empty');
+    if(empty) empty.remove();
     const block = document.createElement('div');
     block.className = 'perf';
     let html = '<span class="head">✦ Perfect · '+n+'</span>\n';
@@ -759,6 +765,12 @@
     render();
   }
 
+  // "c" — quick clean: fresh sheet of paper AND a reset calculator
+  function quickClean(){
+    clearAll();
+    histEl.innerHTML = '<div class="empty">Your sums will appear here…</div>';
+  }
+
   // click handling
   document.getElementById('keys').addEventListener('click',e=>{
     const b = e.target.closest('button'); if(!b) return;
@@ -775,16 +787,18 @@
 
   // keyboard handling
   window.addEventListener('keydown',e=>{
-    // don't hijack typing in the notes pad or in a history margin note
+    // don't hijack typing in a margin note on the pad
     const ae = document.activeElement;
-    if(ae && (ae.id==='notes' || ae.classList.contains('cmt'))) return;
+    if(ae && ae.classList.contains('cmt')) return;
     const k = e.key;
     if(k>='0'&&k<='9'){ inputDigit(k); e.preventDefault(); }
     else if(k==='.'){ inputDot(); e.preventDefault(); }
     else if(k==='+'||k==='-'||k==='*'||k==='/'){ setOp(k); e.preventDefault(); }
     else if(k==='Enter'||k==='='){ equals(); e.preventDefault(); }
     else if(k==='%'){ percent(); e.preventDefault(); }
-    else if(k==='Escape'||k==='c'||k==='C'){ clearAll(); e.preventDefault(); }
+    else if(k==='Escape'){ clearAll(); e.preventDefault(); }
+    else if(k==='c'||k==='C'){ quickClean(); e.preventDefault(); }
+    else if(k==='n'||k==='N'){ noteLastEntry(); e.preventDefault(); }
     else if(k==='Backspace'){
       if(!freshEntry && !errored){
         current = current.length<=1 || (current.length===2&&current.startsWith('-')) ? '0' : current.slice(0,-1);
