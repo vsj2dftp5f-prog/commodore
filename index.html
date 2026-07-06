@@ -375,6 +375,157 @@
   }
   .swipe-hint{display:none;text-align:center;color:#b9a888;font-size:12px;
     letter-spacing:1px;padding:2px 0 6px;}
+  /* ============================================================
+     SKIN DECK — vertical carousel that swaps whole calculators.
+     One engine drives every face, so the number is continuous
+     across skins. Horizontal swipe still switches note pad / keys
+     on phones; vertical swipe switches the calculator.
+     ============================================================ */
+  .calc-wrap{flex-direction:column;gap:12px;}
+  .skin-tag{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    color:#e9dcc4;font-size:12px;letter-spacing:1px;
+    padding:2px 0 0;flex-wrap:wrap;
+  }
+  .skin-tag .dots{display:flex;gap:9px;}
+  .skin-tag .dot{
+    width:10px;height:10px;border-radius:50%;padding:0;cursor:pointer;
+    border:1px solid #e9dcc466;background:#ffffff1c;transition:.2s;
+  }
+  .skin-tag .dot.on{background:#e9dcc4;border-color:#e9dcc4;box-shadow:0 0 8px #e9dcc4aa;}
+  .skin-tag .skin-name{min-width:158px;text-align:center;color:#f4ead6;font-weight:600;font-size:13px;}
+  .skin-tag .skin-swipe{opacity:.55;font-size:11px;}
+
+  .deck{position:relative;width:100%;max-width:380px;margin:0 auto;}
+  .face-slide{
+    transition:opacity .42s ease, transform .42s cubic-bezier(.4,.05,.2,1);
+    will-change:opacity,transform;
+  }
+  .face-slide.is-active{position:relative;opacity:1;transform:none;z-index:2;}
+  .face-slide.is-prev,.face-slide.is-next{
+    position:absolute;inset:0;opacity:0;pointer-events:none;z-index:1;
+  }
+  .face-slide.is-prev{transform:translateY(-30px) scale(.965);}
+  .face-slide.is-next{transform:translateY(30px) scale(.965);}
+  /* shared power-off behaviour for every skin */
+  .deck.off .out,.deck.off .ghost,.deck.off .mini{visibility:hidden;}
+  .deck.off .keys{pointer-events:none;}
+  .deck.off .pswitch .knob{left:2px;}
+
+  .face{width:100%;max-width:380px;margin:0 auto;}
+
+  /* ===================== LUMON skin ===================== */
+  /* Severance "MDR terminal": bone-white shell, dark green screen,
+     mint seven-segment glow, teal operator caps. */
+  .face.lumon{
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#FDFDFB 0%,#F3F5F1 46%,#E7EAE4 100%);
+    border-radius:34px;padding:22px 20px 22px;border:1px solid #d9ded7;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.95),
+      inset 0 -2px 4px rgba(140,152,145,.25),
+      0 14px 0 -2px #D4D8D1,
+      0 30px 60px rgba(60,74,67,.35);
+    position:relative;
+  }
+  .lumon .l-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 14px;}
+  .lumon .l-logo{font-size:13px;font-weight:600;letter-spacing:8px;color:#6a7a72;}
+  .lumon .l-sub{font-size:8px;letter-spacing:3px;color:#a4b0a8;display:block;margin-top:2px;}
+  .lumon .pswitch .lbl{color:#8f9d94;}
+  .lumon .pswitch .track{background:linear-gradient(180deg,#dfe4de,#c9cfc7);box-shadow:0 1px 0 #fff,0 1px 3px #0002 inset;}
+  .lumon .pswitch .knob{background:linear-gradient(180deg,#fff,#cfd5cd 70%,#b9c0b8);}
+  .lumon .display{
+    background:linear-gradient(180deg,#0C1210 0%,#111917 55%,#0E1513 100%);
+    border-radius:16px;border:1px solid rgba(70,82,76,.4);margin:0 2px 20px;padding:16px 18px;
+    box-shadow:inset 0 5px 14px rgba(0,0,0,.75),0 1px 0 rgba(255,255,255,.85);
+  }
+  .lumon .display::after{box-shadow:none;}
+  .lumon .l-screenlbl{position:absolute;font-size:11px;font-weight:600;letter-spacing:7px;
+    color:rgba(176,238,226,.72);text-shadow:0 0 10px rgba(130,225,208,.45);}
+  .lumon .mini{color:#5f9b8a;}
+  .lumon .out{color:#B6F1E6;text-shadow:0 0 12px rgba(130,230,212,.55),0 0 4px rgba(180,245,232,.85);}
+  .lumon .ghost{color:rgba(150,215,205,.07);}
+  .lumon .keys{gap:12px;}
+  .lumon .k{
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:500;font-size:20px;
+    color:#3B4844;border-radius:22px;padding:15px 0;
+    background:radial-gradient(130% 100% at 50% 14%,#FFFFFF 0%,#F1F3EF 55%,#E1E4DE 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -3px 6px rgba(120,135,128,.16),
+      0 8px 14px rgba(70,84,78,.2),0 2px 3px rgba(70,84,78,.16);
+  }
+  .lumon .k:active{transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(70,84,78,.35);}
+  .lumon .k.op,.lumon .k.eq{color:#F4FAF8;
+    background:radial-gradient(120% 90% at 50% 10%,rgba(255,255,255,.38),rgba(255,255,255,0) 42%),
+      radial-gradient(130% 110% at 50% 18%,#6FA39B 0%,#527f78 78%,#436962 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -3px 7px rgba(30,55,50,.3),
+      0 8px 14px rgba(70,84,78,.24);}
+  .lumon .k.op:active,.lumon .k.eq:active{transform:translateY(3px);box-shadow:inset 0 2px 7px rgba(20,40,36,.5);}
+  .lumon .k.op.active{outline:2px solid #B6F1E6;outline-offset:-5px;}
+  .lumon .wide{grid-column:span 2;}
+  .lumon .l-foot{text-align:center;color:#9aa8a0;font-size:9px;letter-spacing:3px;margin-top:16px;}
+
+  /* ===================== ATOMIC / NOVA·70 skin ===================== */
+  /* 1970s walnut + chrome desktop unit: chrome perimeter, dark-brown
+     body, gold model bar, chrome-bezel VFD, burnt-orange operators. */
+  .face.atomic{
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#F2F3F2 0%,#C7C9C8 8%,#9EA2A2 100%);
+    border-radius:30px;padding:8px;position:relative;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.9),0 14px 0 -2px #6E5A42,0 30px 60px rgba(64,44,22,.42);
+  }
+  .atomic .a-body{
+    background:linear-gradient(180deg,#5C4130 0%,#4A3325 48%,#38251A 100%);
+    border-radius:24px;padding:18px 16px 20px;
+    box-shadow:inset 0 2px 3px rgba(255,235,210,.25),inset 0 -3px 8px rgba(0,0,0,.45);
+  }
+  .atomic .a-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 12px;}
+  .atomic .a-brand{font-style:italic;font-weight:700;letter-spacing:4px;font-size:14px;color:#eaca90;}
+  .atomic .pswitch .lbl{color:#caa877;}
+  .atomic .pswitch .track{background:linear-gradient(180deg,#2a1c11,#3c2818);box-shadow:0 1px 0 #ffffff20,0 2px 4px #000a inset;}
+  .atomic .pswitch .knob{background:linear-gradient(180deg,#f4dcae,#c8a15f 70%,#a17e3f);}
+  .atomic .display{
+    background:linear-gradient(180deg,#06120A 0%,#0B1A10 55%,#08140C 100%);
+    border-radius:12px;margin:2px 2px 14px;padding:14px 16px;border:none;
+    box-shadow:
+      0 0 0 3px #cfd3d2 inset,0 0 0 5px #8a8f8e,
+      inset 0 5px 14px rgba(0,0,0,.8),0 2px 4px rgba(0,0,0,.4);
+  }
+  .atomic .display::after{box-shadow:0 0 40px 12px #000b inset;}
+  .atomic .a-screenlbl{position:absolute;font-size:12px;font-weight:700;font-style:italic;letter-spacing:4px;
+    color:rgba(170,255,195,.7);text-shadow:0 0 10px rgba(120,255,160,.5);}
+  .atomic .mini{color:#4f9a63;}
+  .atomic .out{color:#A9FFBE;text-shadow:0 0 16px rgba(90,255,140,.6),0 0 5px rgba(180,255,205,.9);}
+  .atomic .ghost{color:rgba(140,230,165,.07);}
+  .atomic .goldbar{
+    height:26px;border-radius:8px;margin:0 2px 14px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;letter-spacing:5px;font-size:12px;color:#4A3512;text-shadow:0 1px 0 rgba(255,240,190,.55);
+    background:linear-gradient(180deg,#D8B45E 0%,#C39B41 45%,#A67E2C 80%,#C6A04A 100%);
+    box-shadow:inset 0 1px 0 rgba(255,240,190,.8),inset 0 -2px 4px rgba(80,50,5,.45),0 3px 6px rgba(20,10,4,.4);
+  }
+  .atomic .keys{
+    gap:14px;padding:16px 14px;border-radius:20px;
+    background:linear-gradient(180deg,#372516,#442E1E);
+    box-shadow:inset 0 5px 12px rgba(0,0,0,.55),inset 0 -1px 2px rgba(255,225,190,.14);
+  }
+  .atomic .k{
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:19px;
+    color:#4A3A28;border-radius:20px;padding:14px 0;border:none;
+    background:radial-gradient(120% 95% at 50% 12%,#FFFFF8 0%,#F6EEDA 45%,#E6DABF 78%,#D5C6A6 100%);
+    box-shadow:0 6px 0 -1px #8E9291,0 8px 10px rgba(20,10,4,.42),
+      inset 0 2px 1px rgba(255,255,255,1),inset 0 -4px 7px rgba(110,90,60,.3);
+  }
+  .atomic .k:active{transform:translateY(5px);box-shadow:0 0 0 #8E9291,inset 0 2px 6px rgba(80,50,20,.45);}
+  .atomic .k.clr{color:#7A3A16;}
+  .atomic .k.op,.atomic .k.eq{color:#FFF4E4;
+    background:radial-gradient(120% 90% at 50% 10%,rgba(255,235,210,.4),rgba(255,235,210,0) 42%),
+      radial-gradient(130% 110% at 50% 18%,#C9651F 0%,#a4501a 78%,#853f13 100%);
+    box-shadow:0 6px 0 -1px #6F4A2A,0 8px 10px rgba(20,10,4,.42),
+      inset 0 2px 1px rgba(255,240,220,.55),inset 0 -4px 8px rgba(70,25,4,.5);}
+  .atomic .k.op:active,.atomic .k.eq:active{transform:translateY(5px);box-shadow:0 0 0 #6F4A2A,inset 0 2px 7px rgba(50,15,2,.55);}
+  .atomic .k.op.active{outline:2px solid #FFD9A6;outline-offset:-5px;}
+  .atomic .wide{grid-column:span 2;}
+  .atomic .a-foot{text-align:center;color:#cbb48f;font-size:9px;letter-spacing:3px;margin-top:14px;}
 </style>
 </head>
 <body>
@@ -393,62 +544,160 @@
       </div>
     </section>
 
-    <!-- MIDDLE: calculator -->
+    <!-- MIDDLE: calculator deck (swipe vertically to swap skins) -->
     <section class="calc-wrap">
-      <div class="calc" role="application" aria-label="Commodore GL-997R calculator">
-        <div class="brand">
-          <span class="clogo" aria-hidden="true"><svg viewBox="0 0 109 106" xmlns="http://www.w3.org/2000/svg">
-            <path d="m52.625 0c-29.054 0-52.625 23.571-52.625 52.625s23.571 52.594 52.625 52.594c5.5874 0 10.98-0.88711 16.031-2.5v-26.25c-4.3621 2.5362-9.4669 4-14.938 4-15.988 0-28.938-12.465-28.938-27.844s12.95-27.844 28.938-27.844c5.4706 0 10.575 1.4638 14.938 4v-26.281c-5.0513-1.6148-10.444-2.5-16.031-2.5z" fill="#c6c9ce"/>
-            <polygon points="108.32,32.61 90.79,50.86 69.12,50.86 69.12,32.61" fill="#c6c9ce"/>
-            <polygon points="108.32,72.82 90.79,54.56 69.12,54.56 69.12,72.82" fill="#e8341c"/>
-          </svg></span>
-          <span class="model">CUSTOM<b>GREEN LINE</b></span>
-          <div class="pswitch" id="pswitch" role="switch" aria-checked="true" aria-label="Power">
-            <span class="lbl">OFF</span><span class="track"><span class="knob"></span></span><span class="lbl">ON</span>
+      <div class="skin-tag">
+        <span class="dots">
+          <button class="dot on" data-skin="0" aria-label="Commodore"></button>
+          <button class="dot" data-skin="1" aria-label="Lumon"></button>
+          <button class="dot" data-skin="2" aria-label="Atomic"></button>
+        </span>
+        <span class="skin-name" id="skinName">Commodore GL-997R</span>
+      </div>
+
+      <div class="deck" id="deck">
+
+        <!-- ---- Skin 0 : Commodore GL-997R (the original) ---- -->
+        <div class="face-slide is-active" data-skin="0">
+          <div class="calc" role="application" aria-label="Commodore GL-997R calculator">
+            <div class="brand">
+              <span class="clogo" aria-hidden="true"><svg viewBox="0 0 109 106" xmlns="http://www.w3.org/2000/svg">
+                <path d="m52.625 0c-29.054 0-52.625 23.571-52.625 52.625s23.571 52.594 52.625 52.594c5.5874 0 10.98-0.88711 16.031-2.5v-26.25c-4.3621 2.5362-9.4669 4-14.938 4-15.988 0-28.938-12.465-28.938-27.844s12.95-27.844 28.938-27.844c5.4706 0 10.575 1.4638 14.938 4v-26.281c-5.0513-1.6148-10.444-2.5-16.031-2.5z" fill="#c6c9ce"/>
+                <polygon points="108.32,32.61 90.79,50.86 69.12,50.86 69.12,32.61" fill="#c6c9ce"/>
+                <polygon points="108.32,72.82 90.79,54.56 69.12,54.56 69.12,72.82" fill="#e8341c"/>
+              </svg></span>
+              <span class="model">CUSTOM<b>GREEN LINE</b></span>
+              <div class="pswitch" role="switch" aria-checked="true" aria-label="Power">
+                <span class="lbl">OFF</span><span class="track"><span class="knob"></span></span><span class="lbl">ON</span>
+              </div>
+            </div>
+            <div class="display">
+              <div class="mini"></div>
+              <div class="digits">
+                <div class="ghost">88888888</div>
+                <div class="out">0</div>
+              </div>
+            </div>
+            <div class="trim"></div>
+            <div class="keybed">
+              <div class="keys">
+                <button class="k fn" data-act="sign">±</button>
+                <button class="k fn" data-act="percent">%</button>
+                <span class="kspacer"></span>
+                <button class="k op" data-op="*">×</button>
+                <button class="k" data-num="7">7</button>
+                <button class="k" data-num="8">8</button>
+                <button class="k" data-num="9">9</button>
+                <button class="k op" data-op="/">÷</button>
+                <button class="k" data-num="4">4</button>
+                <button class="k" data-num="5">5</button>
+                <button class="k" data-num="6">6</button>
+                <button class="k op" data-op="-">−</button>
+                <button class="k" data-num="1">1</button>
+                <button class="k" data-num="2">2</button>
+                <button class="k" data-num="3">3</button>
+                <button class="k op" data-op="+">+</button>
+                <button class="k clr" data-act="clear">C</button>
+                <button class="k zero" data-num="0">0</button>
+                <button class="k" data-act="dot">.</button>
+                <button class="k eq" data-act="equals">=</button>
+              </div>
+            </div>
+            <div class="wordmark"><span class="txt">commodore</span></div>
+            <div class="feet">8 - DIGIT &nbsp;•&nbsp; VFD &nbsp;•&nbsp; MADE IN JAPAN</div>
           </div>
         </div>
 
-        <div class="display">
-          <div class="mini" id="mini"></div>
-          <div class="digits">
-            <div class="ghost">88888888</div>
-            <div class="out" id="out">0</div>
+        <!-- ---- Skin 1 : Lumon MDR terminal ---- -->
+        <div class="face-slide is-next" data-skin="1">
+          <div class="face lumon" role="application" aria-label="Lumon MDR calculator">
+            <div class="l-head">
+              <div>
+                <span class="l-logo">LUMON</span>
+                <span class="l-sub">MACRODATA · REFINEMENT</span>
+              </div>
+              <div class="pswitch" role="switch" aria-checked="true" aria-label="Power">
+                <span class="lbl">OFF</span><span class="track"><span class="knob"></span></span><span class="lbl">ON</span>
+              </div>
+            </div>
+            <div class="display">
+              <span class="l-screenlbl" style="top:14px;left:20px;">LUMON</span>
+              <div class="mini"></div>
+              <div class="digits">
+                <div class="ghost">88888888</div>
+                <div class="out">0</div>
+              </div>
+            </div>
+            <div class="keys">
+              <button class="k clr" data-act="clear">C</button>
+              <button class="k ce" data-act="clearEntry">CE</button>
+              <button class="k" data-act="percent">%</button>
+              <button class="k op" data-op="/">÷</button>
+              <button class="k" data-num="7">7</button>
+              <button class="k" data-num="8">8</button>
+              <button class="k" data-num="9">9</button>
+              <button class="k op" data-op="*">×</button>
+              <button class="k" data-num="4">4</button>
+              <button class="k" data-num="5">5</button>
+              <button class="k" data-num="6">6</button>
+              <button class="k op" data-op="-">−</button>
+              <button class="k" data-num="1">1</button>
+              <button class="k" data-num="2">2</button>
+              <button class="k" data-num="3">3</button>
+              <button class="k op" data-op="+">+</button>
+              <button class="k wide" data-num="0">0</button>
+              <button class="k" data-act="dot">.</button>
+              <button class="k eq" data-act="equals">=</button>
+            </div>
+            <div class="l-foot">THE WORK IS MYSTERIOUS AND IMPORTANT</div>
           </div>
         </div>
 
-        <div class="trim"></div>
-
-        <div class="keybed">
-        <div class="keys" id="keys">
-          <button class="k fn" data-act="sign">±</button>
-          <button class="k fn" data-act="percent">%</button>
-          <span class="kspacer"></span>
-          <button class="k op" data-op="*">×</button>
-
-          <button class="k" data-num="7">7</button>
-          <button class="k" data-num="8">8</button>
-          <button class="k" data-num="9">9</button>
-          <button class="k op" data-op="/">÷</button>
-
-          <button class="k" data-num="4">4</button>
-          <button class="k" data-num="5">5</button>
-          <button class="k" data-num="6">6</button>
-          <button class="k op" data-op="-">−</button>
-
-          <button class="k" data-num="1">1</button>
-          <button class="k" data-num="2">2</button>
-          <button class="k" data-num="3">3</button>
-          <button class="k op" data-op="+">+</button>
-
-          <button class="k clr" data-act="clear">C</button>
-          <button class="k zero" data-num="0">0</button>
-          <button class="k" data-act="dot">.</button>
-          <button class="k eq" data-act="equals">=</button>
+        <!-- ---- Skin 2 : Nova·70 Atomic ---- -->
+        <div class="face-slide is-next" data-skin="2">
+          <div class="face atomic" role="application" aria-label="Nova 70 atomic calculator">
+            <div class="a-body">
+              <div class="a-head">
+                <span class="a-brand">NOVA·70</span>
+                <div class="pswitch" role="switch" aria-checked="true" aria-label="Power">
+                  <span class="lbl">OFF</span><span class="track"><span class="knob"></span></span><span class="lbl">ON</span>
+                </div>
+              </div>
+              <div class="display">
+                <span class="a-screenlbl" style="top:12px;left:20px;">NOVA·70</span>
+                <div class="mini"></div>
+                <div class="digits">
+                  <div class="ghost">88888888</div>
+                  <div class="out">0</div>
+                </div>
+              </div>
+              <div class="goldbar">MDR 6174 GL 28</div>
+              <div class="keys">
+                <button class="k clr" data-act="clear">C</button>
+                <button class="k ce" data-act="clearEntry">CE</button>
+                <button class="k" data-act="percent">%</button>
+                <button class="k op" data-op="/">÷</button>
+                <button class="k" data-num="7">7</button>
+                <button class="k" data-num="8">8</button>
+                <button class="k" data-num="9">9</button>
+                <button class="k op" data-op="*">×</button>
+                <button class="k" data-num="4">4</button>
+                <button class="k" data-num="5">5</button>
+                <button class="k" data-num="6">6</button>
+                <button class="k op" data-op="-">−</button>
+                <button class="k" data-num="1">1</button>
+                <button class="k" data-num="2">2</button>
+                <button class="k" data-num="3">3</button>
+                <button class="k op" data-op="+">+</button>
+                <button class="k wide" data-num="0">0</button>
+                <button class="k" data-act="dot">.</button>
+                <button class="k eq" data-act="equals">=</button>
+              </div>
+              <div class="a-foot">SOLID STATE &nbsp;•&nbsp; VFD &nbsp;•&nbsp; MADE IN JAPAN</div>
+            </div>
+          </div>
         </div>
-        </div>
 
-        <div class="wordmark"><span class="txt">commodore</span></div>
-        <div class="feet">8 - DIGIT &nbsp;•&nbsp; VFD &nbsp;•&nbsp; MADE IN JAPAN</div>
       </div>
     </section>
   </main>
@@ -461,8 +710,8 @@
 <script>
 (function(){
   const MAX = 8; // 8-digit display like the real thing
-  const outEl = document.getElementById('out');
-  const miniEl = document.getElementById('mini');
+  const outEls = document.querySelectorAll('.out');
+  const miniEls = document.querySelectorAll('.mini');
   const histEl = document.getElementById('history');
 
   let current = '0';     // string shown
@@ -494,11 +743,12 @@
   }
 
   function render(){
-    outEl.textContent = current;
-    miniEl.textContent = (stored!==null && op) ? (fmt(String(stored))+' '+opSym[op]) : '';
-    // highlight active operator
+    outEls.forEach(el=>el.textContent = current);
+    const m = (stored!==null && op) ? (fmt(String(stored))+' '+opSym[op]) : '';
+    miniEls.forEach(el=>el.textContent = m);
+    // highlight active operator across every skin
     document.querySelectorAll('button.op').forEach(b=>b.classList.remove('active'));
-    if(op){ const b=document.querySelector(`button[data-op="${op}"]`); if(b) b.classList.add('active'); }
+    if(op){ document.querySelectorAll(`button[data-op="${op}"]`).forEach(b=>b.classList.add('active')); }
   }
 
   function setError(){
@@ -759,6 +1009,10 @@
     render();
   }
 
+  function clearEntry(){
+    if(errored){ clearAll(); return; }
+    current='0'; freshEntry=true; render();
+  }
   function clearAll(){
     current='0'; stored=null; op=null; freshEntry=true; errored=false;
     lastOp=null; lastArg=null;
@@ -772,7 +1026,7 @@
   }
 
   // click handling
-  document.getElementById('keys').addEventListener('click',e=>{
+  document.getElementById('deck').addEventListener('click',e=>{
     const b = e.target.closest('button'); if(!b) return;
     if(b.dataset.num!==undefined) inputDigit(b.dataset.num);
     else if(b.dataset.op) setOp(b.dataset.op);
@@ -781,6 +1035,7 @@
       case 'sign':toggleSign();break;
       case 'percent':percent();break;
       case 'clear':clearAll();break;
+      case 'clearEntry':clearEntry();break;
       case 'equals':equals();break;
     }
   });
@@ -829,16 +1084,88 @@
 <script>
 (function(){
   // ON/OFF slide switch — off means dead dark glass and no input
-  const sw = document.getElementById('pswitch');
-  const calcEl = document.querySelector('.calc');
-  sw.addEventListener('click', function(){
-    const off = calcEl.classList.toggle('off');
-    sw.setAttribute('aria-checked', String(!off));
-  });
+  const deck = document.querySelector('.deck');
+  const switches = [...document.querySelectorAll('.pswitch')];
+  function setPower(off){
+    deck.classList.toggle('off', off);
+    switches.forEach(s=>s.setAttribute('aria-checked', String(!off)));
+    try{ localStorage.setItem('commodore-calc:power', off ? '1' : '0'); }catch(e){}
+  }
+  switches.forEach(s=>s.addEventListener('click', ()=>setPower(!deck.classList.contains('off'))));
   // swallow keyboard input while powered off
   document.addEventListener('keydown', function(e){
-    if(calcEl.classList.contains('off')) e.stopImmediatePropagation();
+    if(deck.classList.contains('off')) e.stopImmediatePropagation();
   }, true);
+  try{ if(localStorage.getItem('commodore-calc:power')==='1') setPower(true); }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  const deck   = document.getElementById('deck');
+  const slides = [...deck.querySelectorAll('.face-slide')];
+  const dots   = [...document.querySelectorAll('.skin-tag .dot')];
+  const nameEl = document.getElementById('skinName');
+  const names  = ['Commodore GL-997R','Lumon MDR Terminal','Nova\u00b770 Atomic'];
+  let idx = 0;
+  function go(next){
+    next = (next + slides.length) % slides.length;
+    if(next === idx) return;
+    slides.forEach((s,i)=>{
+      s.classList.remove('is-active','is-prev','is-next');
+      s.classList.add(i===next ? 'is-active' : (i<next ? 'is-prev' : 'is-next'));
+    });
+    dots.forEach((d,i)=>d.classList.toggle('on', i===next));
+    nameEl.textContent = names[next];
+    idx = next;
+    try{ localStorage.setItem('commodore-calc:skin', String(next)); }catch(e){}
+  }
+  dots.forEach((d,i)=>d.addEventListener('click', ()=>go(i)));
+  // trackpad / mouse wheel (vertical)
+  let wheelLock = false;
+  deck.addEventListener('wheel', function(e){
+    if(Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    if(Math.abs(e.deltaY) < 6) return;
+    e.preventDefault();
+    if(wheelLock) return;
+    wheelLock = true; setTimeout(()=>wheelLock=false, 520);
+    go(idx + (e.deltaY > 0 ? 1 : -1));
+  }, {passive:false});
+  // touch: vertical swipe swaps skin, horizontal is left to the page carousel
+  let sy=0, sx=0, tracking=false;
+  deck.addEventListener('touchstart', function(e){
+    const t=e.touches[0]; sy=t.clientY; sx=t.clientX; tracking=true;
+  }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    if(!tracking) return; tracking=false;
+    const t=e.changedTouches[0], dy=t.clientY-sy, dx=t.clientX-sx;
+    if(Math.abs(dy) > 45 && Math.abs(dy) > Math.abs(dx)){
+      go(idx + (dy < 0 ? 1 : -1));
+    }
+  }, {passive:true});
+  // arrow keys
+  window.addEventListener('keydown', function(e){
+    if(e.key==='ArrowDown'){ go(idx+1); e.preventDefault(); }
+    else if(e.key==='ArrowUp'){ go(idx-1); e.preventDefault(); }
+  });
+  try{ const s=parseInt(localStorage.getItem('commodore-calc:skin'),10); if(s>0 && s<slides.length) go(s); }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  // Persist the note pad (sums, margin notes, easter-egg blocks) between visits.
+  const KEY='commodore-calc:history';
+  const histEl=document.getElementById('history');
+  if(!histEl) return;
+  try{
+    const saved=localStorage.getItem(KEY);
+    if(saved && saved.trim()) histEl.innerHTML=saved;
+  }catch(e){}
+  let t=null;
+  function save(){
+    clearTimeout(t);
+    t=setTimeout(()=>{ try{ localStorage.setItem(KEY, histEl.innerHTML); }catch(e){} }, 300);
+  }
+  new MutationObserver(save).observe(histEl,{childList:true,subtree:true,characterData:true});
 })();
 </script>
 </body>
