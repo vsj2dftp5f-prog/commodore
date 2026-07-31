@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# werkmateriaal dat niet op de site hoeft
+*.zip
+calculator mockups/
+concept*.png
+concept*.svg

@@ -637,12 +637,57 @@
     <div style="font-size:15px;">G R E E N &nbsp; L I N E &nbsp; D E S K</div>
     <div class="sub">EST. 1975</div>
   </header>
+  <style>
+  /* ---- note pad tools: free note + wipe ---- */
+  .pad h2{ right:158px; }
+  .pad-tools{
+    position:absolute; top:4px; right:12px; z-index:4;
+    display:flex; gap:6px; line-height:normal;
+  }
+  .pad-tools button{
+    font-family:'Caveat',cursive; font-size:17px; line-height:1;
+    color:#9a6b2f; background:rgba(255,255,255,.5);
+    border:1px solid #d4cdb6; border-radius:6px;
+    padding:4px 8px; cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .pad-tools button:hover{ background:#fff; color:#b5562a; border-color:#c6bda2; }
+  .pad-tools button:active{ transform:translateY(1px); }
+  #padWipe.armed{ color:#b5562a; background:#fff2ee; border-color:#e7a9a0; }
+
+  /* free-standing note — no calculation required */
+  #history .free{
+    display:block; white-space:pre-wrap; margin:8px 0;
+    color:#2f5fb0; font-style:italic; outline:none; cursor:text;
+    border-radius:3px; min-height:32px;
+  }
+  #history .free::before{ content:"✎ "; opacity:.7; font-style:normal; }
+  #history .free:empty::after{ content:"note…"; color:#9db3d6; }
+
+  /* Collatz easter-egg block */
+  #history .colla{
+    display:block; white-space:pre-wrap; margin:10px 0 6px;
+    color:#2b6f7a;                 /* teal ink for the 3n+1 trip */
+    border-top:1px dashed #bcd9de; padding-top:6px;
+  }
+  #history .colla .head{ color:#b5562a; }
+  #history .colla .win{ color:#2f8a4f; }
+  @media (max-width:860px){
+    .pad h2{ right:152px; }
+    .pad-tools button{ font-size:16px; padding:3px 7px; }
+  }
+  </style>
+
   <div class="swipe-hint">‹ swipe&nbsp;&nbsp;note pad · keys&nbsp;&nbsp;swipe ›</div>
 
   <main class="stage">
     <!-- LEFT: note pad (history + easter eggs) -->
     <section class="pad left-pad">
       <h2>~ note pad ~</h2>
+      <div class="pad-tools">
+        <button type="button" id="padNote" title="new note — no sum needed (m)">✎ note</button>
+        <button type="button" id="padWipe" title="wipe the pad">✕ wipe</button>
+      </div>
       <div class="scroll" id="history">
         <div class="empty">Your sums will appear here…</div>
       </div>
@@ -992,8 +1037,8 @@
     if(!cmt){
       cmt = document.createElement('span');
       cmt.className = 'cmt';
-      cmt.contentEditable = 'true';
-      cmt.spellcheck = false;
+      cmt.setAttribute('contenteditable','true'); // attribute, so it survives innerHTML save/restore
+      cmt.setAttribute('spellcheck','false');
       entry.appendChild(cmt);
     }
     editComment(cmt);
@@ -1007,24 +1052,70 @@
   // "n" — jump to the last calculation and start scribbling a note
   function noteLastEntry(){
     const entries = histEl.querySelectorAll('.entry');
-    if(!entries.length) return;
+    if(!entries.length){ addFreeNote(); return; } // nothing summed yet → loose note
     const last = entries[entries.length-1];
     histEl.scrollTop = histEl.scrollHeight;
     scrollToNotes();
     addNoteTo(last);
   }
   histEl.addEventListener('keydown', e=>{
-    if(!e.target.classList.contains('cmt')) return;
-    if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); }
-    else if(e.key==='Escape'){ e.target.blur(); }
+    const isCmt  = e.target.classList.contains('cmt');
+    const isFree = e.target.classList.contains('free');
+    if(!isCmt && !isFree) return;
+    if(e.key==='Escape'){ e.target.blur(); }
+    // margin notes are one-liners; free notes may wrap onto new lines
+    else if(e.key==='Enter' && isCmt){ e.preventDefault(); e.target.blur(); }
     e.stopPropagation();
   });
   histEl.addEventListener('blur', e=>{
-    if(e.target.classList && e.target.classList.contains('cmt')
+    const cl = e.target.classList;
+    if(cl && (cl.contains('cmt') || cl.contains('free'))
        && e.target.textContent.trim()===''){
       e.target.remove(); // drop empty notes
+      if(!histEl.children.length) wipePad();
     }
   }, true);
+
+  // ---- a note that needs no sum at all ----
+  function addFreeNote(){
+    const empty = histEl.querySelector('.empty');
+    if(empty) empty.remove();
+    const note = document.createElement('div');
+    note.className = 'free';
+    note.setAttribute('contenteditable','true'); // attribute, so it survives innerHTML save/restore
+    note.setAttribute('spellcheck','false');
+    histEl.appendChild(note);
+    histEl.scrollTop = histEl.scrollHeight;
+    editComment(note);
+    try{ scrollToNotes(); }catch(err){}
+  }
+
+  // ---- wipe the pad (two taps, so a stray click costs nothing) ----
+  function wipePad(){
+    histEl.innerHTML = '<div class="empty">Your sums will appear here…</div>';
+  }
+  const padNoteBtn = document.getElementById('padNote');
+  const padWipeBtn = document.getElementById('padWipe');
+  if(padNoteBtn) padNoteBtn.addEventListener('click', addFreeNote);
+  if(padWipeBtn){
+    let armed = null;
+    padWipeBtn.addEventListener('click', ()=>{
+      if(armed){
+        clearTimeout(armed); armed = null;
+        padWipeBtn.classList.remove('armed');
+        padWipeBtn.textContent = '✕ wipe';
+        wipePad();
+        return;
+      }
+      padWipeBtn.classList.add('armed');
+      padWipeBtn.textContent = '✕ sure?';
+      armed = setTimeout(()=>{
+        armed = null;
+        padWipeBtn.classList.remove('armed');
+        padWipeBtn.textContent = '✕ wipe';
+      }, 3000);
+    });
+  }
 
   function setOp(nextOp){
     if(errored) return;
@@ -1094,6 +1185,48 @@
     notes.scrollTop = notes.scrollHeight;
   }
 
+  // ---- Collatz conjecture easter egg (3n+1) ----
+  function collatzEligible(str){
+    if(str.indexOf('.')>=0 || str.startsWith('-')) return false;
+    const n = parseInt(str,10);
+    return !isNaN(n) && n>=2 && n<=999999;
+  }
+
+  function runCollatz(){
+    const n = parseInt(current,10);
+    const seq = [n];
+    let cur = n, peak = n, guard = 0;
+    while(cur!==1 && guard<2000){
+      cur = (cur%2===0) ? cur/2 : 3*cur+1;
+      seq.push(cur);
+      if(cur>peak) peak = cur;
+      guard++;
+    }
+    writeCollatzNote(n, seq, peak);
+    current = '1'; stored=null; op=null; lastOp=null; lastArg=null;
+    freshEntry=true; render();
+    scrollToNotes();
+  }
+
+  function writeCollatzNote(n, seq, peak){
+    const notes = histEl;
+    const empty = notes.querySelector('.empty');
+    if(empty) empty.remove();
+    const block = document.createElement('div');
+    block.className = 'colla';
+    // long trips get their middle folded away so the pad stays readable
+    const shown = (seq.length<=14)
+      ? seq.join(' → ')
+      : seq.slice(0,7).join(' → ') + ' → … → ' + seq.slice(-5).join(' → ');
+    let html = '<span class="head">✦ Collatz · '+n+'</span>\n';
+    html += shown.replace(/1$/, '<span class="win">1  ✓</span>')+'\n';
+    html += '↳ '+(seq.length-1)+' steps · peak '+peak.toLocaleString('en-US')+'\n';
+    html += 'even → n÷2 · odd → 3n+1\nalways lands on 1 — still nobody can prove it';
+    block.innerHTML = html;
+    notes.appendChild(block);
+    notes.scrollTop = notes.scrollHeight;
+  }
+
   function scrollToNotes(){
     const stage = document.querySelector('.stage');
     if(window.matchMedia('(max-width:860px)').matches){
@@ -1151,6 +1284,7 @@
       const divs = perfectDivisors(current);
       if(divs){ runPerfect(divs); return; }
       if(kaprekarEligible(current)){ runKaprekar(); return; }
+      if(collatzEligible(current)){ runCollatz(); return; }
     }
     let a,b,o;
     if(op){
@@ -1207,7 +1341,7 @@
   window.addEventListener('keydown',e=>{
     // don't hijack typing in a margin note on the pad
     const ae = document.activeElement;
-    if(ae && ae.classList.contains('cmt')) return;
+    if(ae && (ae.classList.contains('cmt') || ae.classList.contains('free'))) return;
     const k = e.key;
     if(k>='0'&&k<='9'){ inputDigit(k); e.preventDefault(); }
     else if(k==='.'){ inputDot(); e.preventDefault(); }
@@ -1217,6 +1351,7 @@
     else if(k==='Escape'){ clearAll(); e.preventDefault(); }
     else if(k==='c'||k==='C'){ quickClean(); e.preventDefault(); }
     else if(k==='n'||k==='N'){ noteLastEntry(); e.preventDefault(); }
+    else if(k==='m'||k==='M'){ addFreeNote(); e.preventDefault(); }
     else if(k==='Backspace'){
       if(!freshEntry && !errored){
         current = current.length<=1 || (current.length===2&&current.startsWith('-')) ? '0' : current.slice(0,-1);
