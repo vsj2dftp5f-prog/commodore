@@ -1150,12 +1150,17 @@
     }
   }
 
-  function logHistory(expr,result){
+  function logHistory(expr,result,raw){
     const empty = histEl.querySelector('.empty');
     if(empty) empty.remove();
     const div = document.createElement('div');
     div.className='entry';
-    div.innerHTML = expr+' = '+'<span class="res">'+result+'</span>';
+    let shown = result;
+    if(raw!==undefined && isFinite(raw)){
+      div.dataset.raw = String(raw);      // keep full precision so ≈ can re-round later
+      shown = entryResult(raw);
+    }
+    div.innerHTML = expr+' = '+'<span class="res">'+shown+'</span>';
     div.title = 'click to add a note';
     histEl.appendChild(div);
     histEl.scrollTop = histEl.scrollHeight;
@@ -1305,6 +1310,10 @@
     if(roundMode==='0')  return String(Math.round(v));
     return String(Number(v.toPrecision(10)));
   }
+  // calculator history lines: 'off' keeps the classic 8-digit look
+  function entryResult(v){
+    return roundMode==='off' ? fmt(String(v)) : fmtResult(v);
+  }
 
   function runFormula(el, echo){
     if(echo===undefined) echo = true;
@@ -1348,6 +1357,14 @@
       // recompute every finished sum so old results follow the new setting
       histEl.querySelectorAll('.fx').forEach(el=>{
         if(el.textContent.indexOf('=')>=0) runFormula(el, false);
+      });
+      // …and the calculator's own history lines too
+      histEl.querySelectorAll('.entry').forEach(el=>{
+        const span = el.querySelector('.res'); if(!span) return;
+        const raw = Number(el.dataset.raw!==undefined ? el.dataset.raw : span.textContent);
+        if(!isFinite(raw)) return;           // skip 'Error' lines
+        el.dataset.raw = String(raw);
+        span.textContent = entryResult(raw);
       });
     });
     paintRound();
@@ -1553,7 +1570,7 @@
     const r = compute(a,b,o);
     if(!isFinite(r) || Math.abs(r)>=1e8){ logHistory(fmt(String(a))+' '+opSym[o]+' '+fmt(String(b)), 'Error'); setError(); return; }
     const rStr = fmt(String(r));
-    logHistory(fmt(String(a))+' '+opSym[o]+' '+fmt(String(b)), rStr);
+    logHistory(fmt(String(a))+' '+opSym[o]+' '+fmt(String(b)), rStr, r);
     current = rStr;
     stored = null;
     op = null;
