@@ -644,7 +644,7 @@
   </header>
   <style>
   /* ---- note pad tools: formula + free note + wipe ---- */
-  .pad h2{ right:224px; }
+  .pad h2{ right:292px; }
   .pad-tools{
     position:absolute; top:4px; right:12px; z-index:4;
     display:flex; gap:6px; line-height:normal;
@@ -799,7 +799,7 @@
     .board{ flex:1 1 0; min-height:210px; }
   }
   @media (max-width:860px){
-    .pad h2{ right:216px; }
+    .pad h2{ right:276px; }
     .pad-tools button{ font-size:13px; padding:3px 7px; }
     .board{ max-height:52vh; }
     .postit{ width:100%; }
@@ -816,6 +816,7 @@
         <div class="pad-tools">
           <button type="button" id="padSum" title="write a sum with brackets — Enter computes (s)">∑ sum</button>
           <button type="button" id="padNote" title="new note — no sum needed (m)">✎ note</button>
+          <button type="button" id="padRound" title="rounding for ∑ results: 2 decimals → whole → off">≈ 0.00</button>
           <button type="button" id="padWipe" title="wipe the pad">✕ wipe</button>
         </div>
         <div class="scroll" id="history">
@@ -1292,20 +1293,34 @@
     const d=document.createElement('div'); d.textContent=t; return d.innerHTML;
   }
 
-  function runFormula(el){
+  // ---- rounding preference for ∑ results: '2' decimals (default) | '0' | 'off' ----
+  const ROUND_KEY = 'commodore-calc:round';
+  let roundMode = '2';
+  try{
+    const r = localStorage.getItem(ROUND_KEY);
+    if(r==='0' || r==='off') roundMode = r;
+  }catch(e){}
+  function fmtResult(v){
+    if(roundMode==='2')  return (Math.round((v + Math.sign(v)*Number.EPSILON)*100)/100).toFixed(2);
+    if(roundMode==='0')  return String(Math.round(v));
+    return String(Number(v.toPrecision(10)));
+  }
+
+  function runFormula(el, echo){
+    if(echo===undefined) echo = true;
     // anything after the first '=' is an old result — recompute from scratch
     const raw = el.textContent.split('=')[0].trim();
     if(raw===''){ el.blur(); return; }
     try{
       const v = evalExpr(raw);
       if(!isFinite(v)) throw 0;
-      const res = String(Number(v.toPrecision(10)));
+      const res = fmtResult(v);
       el.classList.remove('err');
       el.innerHTML = escHtml(raw)+' = <span class="res">'+escHtml(res)+'</span>';
       el.blur();
       // echo the outcome on the calculator display (8-digit limits apply)
-      if(Math.abs(v)<1e8 && window.calcAPI) window.calcAPI.setValue(v);
-      histEl.scrollTop = histEl.scrollHeight;
+      if(echo && Math.abs(v)<1e8 && window.calcAPI) window.calcAPI.setValue(Number(res));
+      if(echo) histEl.scrollTop = histEl.scrollHeight;
     }catch(err){
       el.classList.add('err');
       el.innerHTML = escHtml(raw)+' = <span class="res">?</span>';
@@ -1321,6 +1336,22 @@
   const padWipeBtn = document.getElementById('padWipe');
   if(padSumBtn)  padSumBtn.addEventListener('click', addFormula);
   if(padNoteBtn) padNoteBtn.addEventListener('click', addFreeNote);
+  // ---- ≈ : cycle rounding (2 decimals → whole → off) and refresh old sums ----
+  const padRoundBtn = document.getElementById('padRound');
+  const roundLabels = {'2':'≈ 0.00','0':'≈ 0','off':'≈ off'};
+  function paintRound(){ if(padRoundBtn) padRoundBtn.textContent = roundLabels[roundMode]; }
+  if(padRoundBtn){
+    padRoundBtn.addEventListener('click', ()=>{
+      roundMode = roundMode==='2' ? '0' : roundMode==='0' ? 'off' : '2';
+      try{ localStorage.setItem(ROUND_KEY, roundMode); }catch(e){}
+      paintRound();
+      // recompute every finished sum so old results follow the new setting
+      histEl.querySelectorAll('.fx').forEach(el=>{
+        if(el.textContent.indexOf('=')>=0) runFormula(el, false);
+      });
+    });
+    paintRound();
+  }
   if(padWipeBtn){
     let armed = null;
     padWipeBtn.addEventListener('click', ()=>{
