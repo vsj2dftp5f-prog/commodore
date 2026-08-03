@@ -109,12 +109,12 @@
   }
   .pad h2{
     position:absolute;top:4px;left:58px;right:18px;margin:0;
-    font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:#9a6b2f;
+    font-family:'Times New Roman',Times,serif;font-style:italic;font-weight:700;font-size:19px;color:#9a6b2f;
     line-height:30px;
   }
   .pad .scroll{
-    font-family:'Caveat',cursive;
-    font-size:23px;
+    font-family:'Times New Roman',Times,serif;
+    font-size:18px;
     line-height:32px;
     color:var(--ink);
     height:100%;
@@ -387,6 +387,11 @@
      on phones; vertical swipe switches the calculator.
      ============================================================ */
   .calc-wrap{flex-direction:column;gap:12px;}
+  /* on wide screens the calculator sits at the top of its column,
+     level with the note pad, instead of floating in the middle */
+  @media (min-width:861px){
+    .calc-wrap{justify-content:flex-start;}
+  }
   .skin-tag{
     display:flex;align-items:center;justify-content:center;gap:14px;
     color:#e9dcc4;font-size:12px;letter-spacing:1px;
@@ -638,14 +643,14 @@
     <div class="sub">EST. 1975</div>
   </header>
   <style>
-  /* ---- note pad tools: free note + wipe ---- */
-  .pad h2{ right:158px; }
+  /* ---- note pad tools: formula + free note + wipe ---- */
+  .pad h2{ right:224px; }
   .pad-tools{
     position:absolute; top:4px; right:12px; z-index:4;
     display:flex; gap:6px; line-height:normal;
   }
   .pad-tools button{
-    font-family:'Caveat',cursive; font-size:17px; line-height:1;
+    font-family:'Times New Roman',Times,serif; font-size:14px; line-height:1;
     color:#9a6b2f; background:rgba(255,255,255,.5);
     border:1px solid #d4cdb6; border-radius:6px;
     padding:4px 8px; cursor:pointer;
@@ -672,24 +677,156 @@
   }
   #history .colla .head{ color:#b5562a; }
   #history .colla .win{ color:#2f8a4f; }
+  /* formula line — write a sum with brackets, Enter computes it */
+  #history .fx{
+    display:block; white-space:pre-wrap; margin:8px 0;
+    color:var(--ink); outline:none; cursor:text;
+    border-radius:3px; min-height:32px;
+  }
+  #history .fx::before{ content:"∑ "; color:#9a6b2f; }
+  #history .fx:empty::after{
+    content:"( 10 / (20-10) ) * 3% …"; color:#b3a98c; font-style:italic;
+  }
+  #history .fx .res{ color:#b5562a; }
+  #history .fx.err .res{ color:#c1402f; }
+
+  /* ---- tear a block off the pad → post-it on the pinboard ---- */
+  #history > div{ position:relative; }
+  #history .tear{
+    position:absolute; top:2px; right:2px; z-index:3;
+    font-family:'Times New Roman',Times,serif; font-size:13px; line-height:1;
+    color:#9a6b2f; background:rgba(255,255,255,.75);
+    border:1px solid #d4cdb6; border-radius:5px; padding:3px 7px;
+    cursor:pointer; opacity:0; transition:opacity .15s;
+  }
+  #history .tear::before{ content:"✂"; }
+  #history > div:hover > .tear{ opacity:1; }
+  @media (hover:none){ #history .tear{ opacity:.35; } }
+  #history .tearing{
+    transition:transform .35s ease, opacity .35s ease;
+    transform:rotate(5deg) translate(34px,30px); opacity:0;
+  }
+
+  /* left column: note pad on top, pinboard below — notes stay in view */
+  .pad-col{ display:flex; flex-direction:column; gap:16px; min-width:0; min-height:0; }
+
+  /* ---- prikbord: photoreal cork board that collects torn-off post-its ----
+     two layers of feTurbulence noise (coarse dark blotches + fine light
+     grain) over a tan gradient, same trick as the calculator's plastic */
+  .board{
+    margin:0; padding:14px 18px 16px;
+    display:flex; flex-direction:column; min-height:0;
+    background:
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.33  0 0 0 0 0.21  0 0 0 0 0.10  0 0 0 0.62 -0.08'/></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>"),
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.95  0 0 0 0 0.80  0 0 0 0 0.58  0 0 0 0.42 0'/></filter><rect width='100%25' height='100%25' filter='url(%23f)'/></svg>"),
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.55  0 0 0 0 0.38  0 0 0 0 0.20  0 0 0 0.5 -0.05'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>"),
+      linear-gradient(180deg,#b5895a 0%,#a1764a 55%,#8e6238 100%);
+    background-size:260px 260px, 120px 120px, 180px 180px, auto;
+    border:9px solid #5b3f24; border-radius:8px;
+    box-shadow:
+      0 12px 30px rgba(0,0,0,.5),
+      inset 0 0 0 2px #7a5533,           /* inner frame edge */
+      inset 0 4px 16px rgba(0,0,0,.45),  /* depth behind the frame */
+      inset 0 -3px 10px rgba(0,0,0,.3);
+  }
+  .board[hidden]{ display:none; }
+  .board h3{
+    margin:0 0 10px; flex:0 0 auto;
+    font-family:'Times New Roman',Times,serif; font-style:italic;
+    color:#f4e6c8; font-size:17px; font-weight:700; letter-spacing:1px;
+    text-shadow:0 1px 2px rgba(0,0,0,.55);
+  }
+  .board .notes{
+    flex:1 1 auto; min-height:0; overflow-y:auto;
+    display:flex; flex-wrap:wrap; gap:18px;
+    align-items:flex-start; align-content:flex-start;
+    padding:4px 6px 8px 2px;
+  }
+  .board .notes::-webkit-scrollbar{ width:8px; }
+  .board .notes::-webkit-scrollbar-thumb{ background:#5b3f24; border-radius:4px; }
+  .postit{
+    width:210px; min-height:130px; padding:24px 13px 34px; position:relative;
+    font-family:'Times New Roman',Times,serif; font-size:15px; line-height:1.4;
+    color:#4a4118; white-space:pre-wrap; word-break:break-word;
+    background:linear-gradient(180deg,#fdf49b 0%,#f6e878 100%);
+    box-shadow:0 8px 14px rgba(0,0,0,.35);
+  }
+  .postit::before{ /* strip of tape */
+    content:""; position:absolute; top:-8px; left:50%; width:72px; height:18px;
+    transform:translateX(-50%) rotate(-2deg);
+    background:rgba(255,255,255,.45); box-shadow:0 1px 2px rgba(0,0,0,.15);
+  }
+  .postit .pi-date{
+    position:absolute; left:13px; bottom:9px;
+    font-size:11px; color:#8a7d3c; font-style:italic;
+  }
+  .postit .pi-tools{ position:absolute; right:9px; bottom:6px; display:flex; gap:5px; }
+  .postit .pi-tools button{
+    font-family:inherit; font-size:12px; line-height:1; color:#6b5f22;
+    background:rgba(255,255,255,.4); border:1px solid #d9cb6d; border-radius:4px;
+    padding:2px 6px; cursor:pointer;
+  }
+  .postit .pi-tools button:hover{ background:#fff; }
+  .postit .pi-del.armed{ color:#c1402f; border-color:#e7a9a0; background:#fff2ee; }
+
+  /* ---- oppakken & slepen ---- */
+  /* wide screens: post-its float free on the cork and can be shuffled */
+  .board .notes.free{ display:block; position:relative; }
+  .notes.free .postit{ position:absolute; cursor:grab; }
+  .postit.dragging{ cursor:grabbing; box-shadow:0 20px 34px rgba(0,0,0,.48); }
+  /* a block lifted off the pad */
+  #history > div{ touch-action:pan-y; }
+  #history .lift{ opacity:.35; outline:2px dashed #c9b98a; outline-offset:2px; }
+  .drag-ghost{
+    position:fixed; z-index:1000; pointer-events:none;
+    font-family:'Times New Roman',Times,serif; font-size:18px; line-height:30px;
+    color:var(--ink); white-space:pre-wrap;
+    background:var(--paper); padding:6px 12px; border-radius:4px;
+    box-shadow:0 16px 32px rgba(0,0,0,.42);
+    transform:rotate(-2deg);
+    max-height:230px; overflow:hidden;
+  }
+  .ins-line{
+    position:fixed; z-index:999; pointer-events:none; height:0;
+    border-top:3px solid #b5562a; border-radius:2px; opacity:.85;
+  }
+  .board.drop-hot{ outline:3px solid #e2a52b; outline-offset:3px; }
+  body.noselect{ -webkit-user-select:none; user-select:none; }
+
+  /* wide screens: pad ⅔, pinboard ½ of the pad, each with its own scroll */
+  @media (min-width:861px){
+    .pad{ flex:2 1 0; min-height:0; }
+    .board{ flex:1 1 0; min-height:210px; }
+  }
   @media (max-width:860px){
-    .pad h2{ right:152px; }
-    .pad-tools button{ font-size:16px; padding:3px 7px; }
+    .pad h2{ right:216px; }
+    .pad-tools button{ font-size:13px; padding:3px 7px; }
+    .board{ max-height:52vh; }
+    .postit{ width:100%; }
   }
   </style>
 
   <div class="swipe-hint">‹ swipe&nbsp;&nbsp;note pad · keys&nbsp;&nbsp;swipe ›</div>
 
   <main class="stage">
-    <!-- LEFT: note pad (history + easter eggs) -->
-    <section class="pad left-pad">
-      <h2>~ note pad ~</h2>
-      <div class="pad-tools">
-        <button type="button" id="padNote" title="new note — no sum needed (m)">✎ note</button>
-        <button type="button" id="padWipe" title="wipe the pad">✕ wipe</button>
+    <!-- LEFT: note pad + pinboard, stacked so the notes stay in view -->
+    <section class="pad-col">
+      <div class="pad left-pad">
+        <h2>~ note pad ~</h2>
+        <div class="pad-tools">
+          <button type="button" id="padSum" title="write a sum with brackets — Enter computes (s)">∑ sum</button>
+          <button type="button" id="padNote" title="new note — no sum needed (m)">✎ note</button>
+          <button type="button" id="padWipe" title="wipe the pad">✕ wipe</button>
+        </div>
+        <div class="scroll" id="history">
+          <div class="empty">Your sums will appear here…</div>
+        </div>
       </div>
-      <div class="scroll" id="history">
-        <div class="empty">Your sums will appear here…</div>
+
+      <!-- PRIKBORD: torn-off post-its stick here (hidden while empty) -->
+      <div class="board" id="board" hidden>
+        <h3>~ prikbord ~</h3>
+        <div class="notes" id="boardNotes"></div>
       </div>
     </section>
 
@@ -913,6 +1050,7 @@
   <footer class="bot">
     A loving tribute to the Commodore GL-997R (1975). Type on your keyboard or click the keys.
     <br><span style="opacity:.8;">✦ Secrets: press = on a 4-digit number for Kaprekar's routine (→ 6174), or on a perfect number (6, 28, 496, 8128…) to see why it's perfect. Press N to jot a note on your last sum, C to clean the pad &amp; calculator.</span>
+    <br><span style="opacity:.8;">✦ S (or ∑ sum) writes a formula on the pad — brackets and % allowed, Enter computes. ✂ tears a block off onto the pinboard — or hold a block to pick it up: drop it on the cork, or shuffle the sheet's order. Post-its slide freely around the board.</span>
   </footer>
 
 <script>
@@ -1061,15 +1199,18 @@
   histEl.addEventListener('keydown', e=>{
     const isCmt  = e.target.classList.contains('cmt');
     const isFree = e.target.classList.contains('free');
-    if(!isCmt && !isFree) return;
+    const isFx   = e.target.classList.contains('fx');
+    if(!isCmt && !isFree && !isFx) return;
     if(e.key==='Escape'){ e.target.blur(); }
     // margin notes are one-liners; free notes may wrap onto new lines
     else if(e.key==='Enter' && isCmt){ e.preventDefault(); e.target.blur(); }
+    // a formula line computes on Enter
+    else if(e.key==='Enter' && isFx){ e.preventDefault(); runFormula(e.target); }
     e.stopPropagation();
   });
   histEl.addEventListener('blur', e=>{
     const cl = e.target.classList;
-    if(cl && (cl.contains('cmt') || cl.contains('free'))
+    if(cl && (cl.contains('cmt') || cl.contains('free') || cl.contains('fx'))
        && e.target.textContent.trim()===''){
       e.target.remove(); // drop empty notes
       if(!histEl.children.length) wipePad();
@@ -1090,12 +1231,95 @@
     try{ scrollToNotes(); }catch(err){}
   }
 
+  // ---- a formula line: brackets, %, × ÷, comma decimals — Enter computes ----
+  function addFormula(){
+    const empty = histEl.querySelector('.empty');
+    if(empty) empty.remove();
+    const line = document.createElement('div');
+    line.className = 'fx';
+    line.setAttribute('contenteditable','true');
+    line.setAttribute('spellcheck','false');
+    histEl.appendChild(line);
+    histEl.scrollTop = histEl.scrollHeight;
+    editComment(line);
+    try{ scrollToNotes(); }catch(err){}
+  }
+
+  // tiny recursive-descent parser: + − × ÷, brackets, postfix % (= ÷100)
+  function evalExpr(str){
+    let s = str.replace(/[×x]/gi,'*').replace(/÷/g,'/').replace(/−/g,'-')
+               .replace(/,/g,'.');
+    let i = 0;
+    function skip(){ while(i<s.length && s[i]===' ') i++; }
+    function num(){
+      skip(); const st=i;
+      while(i<s.length && /[0-9.]/.test(s[i])) i++;
+      if(st===i) throw 0;
+      const v=Number(s.slice(st,i));
+      if(!isFinite(v)) throw 0;
+      return v;
+    }
+    function post(v){ skip(); while(s[i]==='%'){ v=v/100; i++; skip(); } return v; }
+    function primary(){
+      skip();
+      if(s[i]==='('){ i++; const v=expr(); skip(); if(s[i]!==')') throw 0; i++; return post(v); }
+      if(s[i]==='-'){ i++; return -primary(); }
+      if(s[i]==='+'){ i++; return primary(); }
+      return post(num());
+    }
+    function term(){
+      let v=primary();
+      for(;;){ skip();
+        if(s[i]==='*'){ i++; v*=primary(); }
+        else if(s[i]==='/'){ i++; const d=primary(); if(d===0) throw 0; v/=d; }
+        else return v;
+      }
+    }
+    function expr(){
+      let v=term();
+      for(;;){ skip();
+        if(s[i]==='+'){ i++; v+=term(); }
+        else if(s[i]==='-'){ i++; v-=term(); }
+        else return v;
+      }
+    }
+    const v=expr(); skip();
+    if(i<s.length) throw 0;
+    return v;
+  }
+
+  function escHtml(t){
+    const d=document.createElement('div'); d.textContent=t; return d.innerHTML;
+  }
+
+  function runFormula(el){
+    // anything after the first '=' is an old result — recompute from scratch
+    const raw = el.textContent.split('=')[0].trim();
+    if(raw===''){ el.blur(); return; }
+    try{
+      const v = evalExpr(raw);
+      if(!isFinite(v)) throw 0;
+      const res = String(Number(v.toPrecision(10)));
+      el.classList.remove('err');
+      el.innerHTML = escHtml(raw)+' = <span class="res">'+escHtml(res)+'</span>';
+      el.blur();
+      // echo the outcome on the calculator display (8-digit limits apply)
+      if(Math.abs(v)<1e8 && window.calcAPI) window.calcAPI.setValue(v);
+      histEl.scrollTop = histEl.scrollHeight;
+    }catch(err){
+      el.classList.add('err');
+      el.innerHTML = escHtml(raw)+' = <span class="res">?</span>';
+    }
+  }
+
   // ---- wipe the pad (two taps, so a stray click costs nothing) ----
   function wipePad(){
     histEl.innerHTML = '<div class="empty">Your sums will appear here…</div>';
   }
+  const padSumBtn  = document.getElementById('padSum');
   const padNoteBtn = document.getElementById('padNote');
   const padWipeBtn = document.getElementById('padWipe');
+  if(padSumBtn)  padSumBtn.addEventListener('click', addFormula);
   if(padNoteBtn) padNoteBtn.addEventListener('click', addFreeNote);
   if(padWipeBtn){
     let armed = null;
@@ -1341,7 +1565,7 @@
   window.addEventListener('keydown',e=>{
     // don't hijack typing in a margin note on the pad
     const ae = document.activeElement;
-    if(ae && (ae.classList.contains('cmt') || ae.classList.contains('free'))) return;
+    if(ae && (ae.classList.contains('cmt') || ae.classList.contains('free') || ae.classList.contains('fx'))) return;
     const k = e.key;
     if(k>='0'&&k<='9'){ inputDigit(k); e.preventDefault(); }
     else if(k==='.'){ inputDot(); e.preventDefault(); }
@@ -1352,6 +1576,7 @@
     else if(k==='c'||k==='C'){ quickClean(); e.preventDefault(); }
     else if(k==='n'||k==='N'){ noteLastEntry(); e.preventDefault(); }
     else if(k==='m'||k==='M'){ addFreeNote(); e.preventDefault(); }
+    else if(k==='s'||k==='S'){ addFormula(); e.preventDefault(); }
     else if(k==='Backspace'){
       if(!freshEntry && !errored){
         current = current.length<=1 || (current.length===2&&current.startsWith('-')) ? '0' : current.slice(0,-1);
@@ -1547,6 +1772,337 @@
     clearTimeout(flashTimer);
     flashTimer = setTimeout(function(){ flash.classList.remove('show'); }, 2600);
   });
+})();
+</script>
+<script>
+(function(){
+  // ---- PRIKBORD: tear or drag blocks off the pad, pin & shuffle post-its ----
+  const KEY   = 'commodore-calc:postits';
+  const histEl = document.getElementById('history');
+  const board  = document.getElementById('board');
+  const wall   = document.getElementById('boardNotes');
+  if(!histEl || !board || !wall) return;
+
+  const wide = () => window.matchMedia('(min-width:861px)').matches;
+  let items = [];
+  let zTop = 10;
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if(Array.isArray(s)) items = s;
+  }catch(e){}
+  function newId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  items.forEach(function(it){ if(!it.id) it.id = newId(); });
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(items)); }catch(e){} }
+
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function fmtDate(iso){
+    const d = new Date(iso);
+    return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'})
+      + ' · ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  function download(it){
+    const stamp = fmtDate(it.d);
+    const blob = new Blob([it.t + '\n\n— green line desk · ' + stamp + '\n'], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'postit-' + String(it.d).slice(0,10) + '-' + String(it.d).slice(11,16).replace(':','') + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 500);
+  }
+
+  function makeNote(it){
+    const div = document.createElement('div');
+    div.className = 'postit';
+    div.style.transform = 'rotate(' + (it.r || 0) + 'deg)';
+    div.style.zIndex = ++zTop;
+
+    const body = document.createElement('div');
+    body.textContent = it.t;
+    div.appendChild(body);
+
+    const date = document.createElement('span');
+    date.className = 'pi-date';
+    date.textContent = fmtDate(it.d);
+    div.appendChild(date);
+
+    const tools = document.createElement('div');
+    tools.className = 'pi-tools';
+    const dl = document.createElement('button');
+    dl.type = 'button'; dl.textContent = '⬇'; dl.title = 'bewaar als bestandje op je Mac';
+    dl.addEventListener('click', function(){ download(it); });
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'pi-del'; del.textContent = '✕'; del.title = 'weggooien';
+    let armed = null;
+    del.addEventListener('click', function(){
+      if(armed){
+        clearTimeout(armed);
+        const i = items.findIndex(function(o){ return o.id===it.id; });
+        if(i>=0){ items.splice(i,1); save(); renderAll(); }
+        return;
+      }
+      del.classList.add('armed'); del.textContent = 'sure?';
+      armed = setTimeout(function(){
+        armed = null;
+        del.classList.remove('armed'); del.textContent = '✕';
+      }, 3000);
+    });
+    tools.appendChild(dl); tools.appendChild(del);
+    div.appendChild(tools);
+
+    // pick the note up and slide it across the cork
+    div.addEventListener('pointerdown', function(e){
+      if(!wall.classList.contains('free')) return;
+      if(e.button!==undefined && e.button!==0) return;
+      if(e.target.closest('button')) return;
+      const start = { x:e.clientX, y:e.clientY,
+                      l:parseFloat(div.style.left)||0, t:parseFloat(div.style.top)||0 };
+      let moving = false;
+      div.style.zIndex = ++zTop;
+      function mv(ev){
+        const dx = ev.clientX - start.x, dy = ev.clientY - start.y;
+        if(!moving && Math.hypot(dx,dy) > 4){
+          moving = true;
+          div.classList.add('dragging');
+          div.style.transform = 'rotate(0deg) scale(1.04)';
+        }
+        if(moving){
+          const maxX = Math.max(0, wall.clientWidth - div.offsetWidth);
+          it.x = Math.max(0, Math.min(start.l + dx, maxX));
+          it.y = Math.max(0, start.t + dy);
+          div.style.left = it.x + 'px';
+          div.style.top  = it.y + 'px';
+        }
+      }
+      function up(){
+        window.removeEventListener('pointermove', mv);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        if(moving){
+          div.classList.remove('dragging');
+          div.style.transform = 'rotate(' + (it.r||0) + 'deg)';
+          const i = items.findIndex(function(o){ return o.id===it.id; });
+          if(i>=0){ items.splice(i,1); items.push(it); }   // on top of the pile
+          save();
+        }
+      }
+      window.addEventListener('pointermove', mv);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+      e.preventDefault();
+    });
+
+    return div;
+  }
+
+  function renderAll(){
+    wall.innerHTML = '';
+    board.hidden = items.length===0;
+    const free = wide();
+    wall.classList.toggle('free', free);
+    let placed = false;
+    items.forEach(function(it, i){
+      const el = makeNote(it);
+      wall.appendChild(el);
+      if(free){
+        if(typeof it.x !== 'number'){
+          it.x = 12 + ((i*36) % Math.max(40, wall.clientWidth - 230));
+          it.y = 8 + ((i*42) % 150);
+          placed = true;
+        }
+        it.x = Math.max(0, Math.min(it.x, Math.max(0, wall.clientWidth - el.offsetWidth - 4)));
+        el.style.left = it.x + 'px';
+        el.style.top  = it.y + 'px';
+      }else{
+        el.style.left = ''; el.style.top = '';
+      }
+    });
+    if(placed) save();
+  }
+  let rsz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rsz); rsz = setTimeout(renderAll, 180); });
+
+  // put a little ✂ on every block on the pad (idempotent, survives restores)
+  function decorate(){
+    histEl.querySelectorAll(':scope > div').forEach(function(b){
+      if(b.classList.contains('empty') || b.classList.contains('tearing')) return;
+      if(!b.querySelector(':scope > .tear')){
+        const t = document.createElement('button');
+        t.className = 'tear';
+        t.type = 'button';
+        t.setAttribute('contenteditable','false');
+        t.title = 'scheur los → prikbord';
+        b.appendChild(t);
+      }
+    });
+  }
+  decorate();
+  new MutationObserver(decorate).observe(histEl, {childList:true});
+
+  // flatten a pad block to plain text, pens and all
+  function blockText(block){
+    const clone = block.cloneNode(true);
+    clone.querySelectorAll('.tear').forEach(function(x){ x.remove(); });
+    clone.querySelectorAll('.cmt').forEach(function(c){
+      c.replaceWith('\n✎ ' + c.textContent);
+    });
+    let t = (clone.textContent || '').trim();
+    if(block.classList.contains('free')) t = '✎ ' + t;
+    if(block.classList.contains('fx'))   t = '∑ ' + t;
+    return t;
+  }
+  function tidyEmpty(){
+    if(!histEl.querySelector(':scope > div:not(.empty)')){
+      histEl.innerHTML = '<div class="empty">Your sums will appear here…</div>';
+    }
+  }
+  function pinItem(text, x, y){
+    items.push({ id:newId(), t:text, d:new Date().toISOString(),
+                 r:Number((Math.random()*5 - 2.5).toFixed(1)),
+                 x:(typeof x==='number' ? x : null), y:(typeof y==='number' ? y : null) });
+    save(); renderAll();
+  }
+
+  // scissors — capture phase, so tearing never triggers the note editor
+  histEl.addEventListener('click', function(e){
+    const t = e.target.closest('.tear');
+    if(!t) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const block = t.parentElement;
+    const text = blockText(block);
+    if(!text) return;
+    pinItem(text);
+    block.classList.add('tearing');
+    setTimeout(function(){ block.remove(); tidyEmpty(); }, 340);
+  }, true);
+
+  // ---- hold a block to pick it up off the pad: drop on cork or reorder ----
+  let hold=null, downPt=null, downBlock=null, pick=null, justPicked=false;
+  const marker = document.createElement('div');
+  marker.className = 'ins-line';
+  marker.style.display = 'none';
+  document.body.appendChild(marker);
+  function hideMarker(){ marker.style.display='none'; }
+
+  histEl.addEventListener('pointerdown', function(e){
+    if(e.button!==undefined && e.button!==0) return;
+    const block = e.target.closest('#history > div');
+    if(!block || block.classList.contains('empty')) return;
+    if(e.target.closest('.tear')) return;
+    const ae = document.activeElement;
+    if(ae && block.contains(ae)) return;          // busy writing → leave it
+    downBlock = block; downPt = {x:e.clientX, y:e.clientY};
+    clearTimeout(hold);
+    hold = setTimeout(startPick, 280);
+  });
+
+  function startPick(){
+    hold = null;
+    const block = downBlock;
+    const r = block.getBoundingClientRect();
+    const g = block.cloneNode(true);
+    g.querySelectorAll('.tear').forEach(function(x){ x.remove(); });
+    g.removeAttribute('contenteditable');
+    g.classList.add('drag-ghost');
+    g.style.width = Math.max(120, r.width) + 'px';
+    g.style.left = r.left + 'px';
+    g.style.top  = r.top + 'px';
+    document.body.appendChild(g);
+    block.classList.add('lift');
+    document.body.classList.add('noselect');
+    pick = { block:block, ghost:g,
+             dx:downPt.x - r.left, dy:downPt.y - r.top, ref:undefined };
+  }
+
+  function insertRef(y){
+    const blocks = Array.prototype.filter.call(
+      histEl.querySelectorAll(':scope > div'),
+      function(b){ return b!==pick.block && !b.classList.contains('empty'); });
+    for(let i=0;i<blocks.length;i++){
+      const r = blocks[i].getBoundingClientRect();
+      if(y < r.top + r.height/2) return blocks[i];
+    }
+    return null; // end of the sheet
+  }
+
+  window.addEventListener('pointermove', function(e){
+    if(hold && downPt && Math.hypot(e.clientX-downPt.x, e.clientY-downPt.y) > 6){
+      clearTimeout(hold); hold = null;
+    }
+    if(!pick) return;
+    pick.ghost.style.left = (e.clientX - pick.dx) + 'px';
+    pick.ghost.style.top  = (e.clientY - pick.dy) + 'px';
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const overBoard = under && under.closest('.board');
+    board.classList.toggle('drop-hot', !!overBoard);
+    pick.ref = undefined;
+    hideMarker();
+    if(!overBoard && under && under.closest('#history')){
+      const ref = insertRef(e.clientY);
+      pick.ref = ref;   // null = append at the end
+      const hr = histEl.getBoundingClientRect();
+      let top;
+      if(ref){ top = ref.getBoundingClientRect().top - 2; }
+      else{
+        const blocks = histEl.querySelectorAll(':scope > div:not(.empty)');
+        const last = blocks[blocks.length-1];
+        top = last ? last.getBoundingClientRect().bottom + 2 : hr.top + 4;
+      }
+      marker.style.display = 'block';
+      marker.style.left  = hr.left + 'px';
+      marker.style.width = Math.max(0, hr.width - 20) + 'px';
+      marker.style.top   = top + 'px';
+    }
+  });
+
+  function endPick(){
+    const p = pick; pick = null;
+    p.ghost.remove();
+    hideMarker();
+    board.classList.remove('drop-hot');
+    document.body.classList.remove('noselect');
+    return p;
+  }
+
+  window.addEventListener('pointerup', function(e){
+    clearTimeout(hold); hold = null;
+    if(!pick) return;
+    const p = endPick();
+    justPicked = true;
+    setTimeout(function(){ justPicked = false; }, 0);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    if(under && under.closest('.board')){
+      const text = blockText(p.block);
+      if(text){
+        const nr = wall.getBoundingClientRect();
+        const x = e.clientX - nr.left + wall.scrollLeft - 90;
+        const y = e.clientY - nr.top  + wall.scrollTop  - 14;
+        pinItem(text, Math.max(0,x), Math.max(0,y));
+        p.block.classList.remove('lift');
+        p.block.classList.add('tearing');
+        setTimeout(function(){ p.block.remove(); tidyEmpty(); }, 340);
+        return;
+      }
+    }else if(p.ref !== undefined && under && under.closest('#history')){
+      if(p.ref) histEl.insertBefore(p.block, p.ref);
+      else histEl.appendChild(p.block);
+    }
+    p.block.classList.remove('lift');
+  });
+  window.addEventListener('pointercancel', function(){
+    clearTimeout(hold); hold = null;
+    if(pick){ const p = endPick(); p.block.classList.remove('lift'); }
+  });
+
+  // a long hold shouldn't also open the margin-note editor on release
+  histEl.addEventListener('click', function(e){
+    if(justPicked){ e.stopPropagation(); e.preventDefault(); }
+  }, true);
+
+  renderAll();
 })();
 </script>
 </body>
