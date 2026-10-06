@@ -630,7 +630,7 @@
   const slides = [...deck.querySelectorAll('.face-slide')];
   const dots   = [...document.querySelectorAll('.skin-tag .dot')];
   const nameEl = document.getElementById('skinName');
-  const names  = ['Commodore GL-997R','Lumon MDR Terminal','Nova\u00b770 Atomic','Rekenmodule 6174-28'];
+  const names  = ['Commodore GL-997R','Lumon MDR Terminal','Nova\u00b770 Atomic','Rekenmodule 6174-28','GL-997R Classic'];
   let idx = 0;
   function go(next){
     next = (next + slides.length) % slides.length;
@@ -1191,4 +1191,34 @@
   }, true);
 
   renderAll();
+})();
+
+
+(function(){
+  // ---- GL-997R Classic: geheugenknoppen (MC MR M+ M− EX) ----
+  const face = document.querySelector('.face.gl2');
+  if(!face || !window.calcAPI) return;
+  const KEY = 'commodore-calc:gl2mem';
+  const tag = document.getElementById('g2Mem');
+  let mem = null;
+  try{
+    const s = localStorage.getItem(KEY);
+    if(s!==null && s!=='' && isFinite(Number(s))) mem = Number(s);
+  }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY, mem===null?'':String(mem)); }catch(e){} }
+  function paint(){ if(tag) tag.classList.toggle('on', mem!==null); }
+  function val(){ const v = Number(window.calcAPI.getValue()); return isFinite(v)? v : null; }
+  face.addEventListener('click', function(e){
+    const b = e.target.closest('[data-gmem]'); if(!b) return;
+    const v = val();
+    switch(b.dataset.gmem){
+      case 'mc': mem = null; break;
+      case 'mr': if(mem!==null && v!==null) window.calcAPI.setValue(mem); break;
+      case 'mplus': if(v!==null) mem = (mem===null?0:mem) + v; break;
+      case 'mminus': if(v!==null) mem = (mem===null?0:mem) - v; break;
+      case 'ex': { const t = mem; mem = v; if(t!==null) window.calcAPI.setValue(t); break; }
+    }
+    save(); paint();
+  });
+  paint();
 })();

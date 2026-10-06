@@ -840,3 +840,118 @@
   @media (hover:none){ #history .grip{ opacity:.35; } }
   #history.selecting .grip{ display:none; }
   #padSelect.armed{ color:#b5562a; background:#fff2ee; border-color:#e7a9a0; }
+
+
+  /* ===================== GL-997R CLASSIC skin ===================== */
+  /* Naar de echte museum-foto: staand, zwarte kap, lichte onderkant,
+     vierkante donkere sokkels met opgeligd ovaal erboven. */
+  .face.gl2{
+    font-family:'Times New Roman',Times,serif;
+    width:290px; max-width:290px; margin:0 auto;
+    border-radius:16px 16px 12px 12px;
+    background:#14161a;
+    padding-bottom:14px;
+    box-shadow:
+      0 24px 44px rgba(0,0,0,.45),
+      inset 0 2px 1px rgba(255,255,255,.14),
+      inset 0 -3px 8px rgba(0,0,0,.5);
+    display:flex; flex-direction:column;
+  }
+  .gl2 .g2-top{ padding:18px 16px 14px; }
+  .gl2 .g2-plate{
+    text-align:center; margin-bottom:8px;
+    font-size:12px; letter-spacing:4px; font-weight:bold; color:#cfd4da;
+    text-shadow:0 1px 2px rgba(0,0,0,.7);
+  }
+  .gl2 .g2-plate b{ display:block; letter-spacing:6px; color:#e8ecf0; font-size:14px; }
+  .gl2 .g2-rowtop{ display:flex; justify-content:flex-end; margin:0 0 10px; }
+  .gl2 .pswitch .lbl{ color:#c3c9cf; }
+  .gl2 .display{
+    position:relative; width:82%; margin:0 auto; border-radius:4px;
+    padding:12px 12px 9px; min-height:64px;
+    background:linear-gradient(180deg,#030d06 0%, #07220f 55%, #020605 100%);
+    box-shadow:inset 0 4px 12px rgba(0,0,0,.92), inset 0 0 36px rgba(80,230,140,.09),
+               0 1px 0 rgba(255,255,255,.16);
+  }
+  .gl2 .display::after{
+    content:""; position:absolute; top:2px; left:5%; width:42%; height:34%;
+    background:linear-gradient(115deg, rgba(200,255,220,.10), transparent 70%);
+    border-radius:3px; pointer-events:none;
+  }
+  .gl2 .g2-memtag{
+    position:absolute; left:10px; top:9px; font-size:9px; letter-spacing:2px;
+    color:#3f8a5b; opacity:0; transition:opacity .2s; z-index:2;
+  }
+  .gl2 .g2-memtag.on{ opacity:.95; }
+  .gl2 .digits .out{
+    color:#4de87e;
+    text-shadow:0 0 7px rgba(70,240,120,.6), 0 0 22px rgba(70,240,120,.28);
+  }
+  .gl2 .digits .ghost{ color:rgba(140,255,180,.08); }
+
+  .gl2 .g2-bottom{
+    margin:0 10px; border-radius:8px; padding:14px 10px 8px;
+    background:
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='6' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.94  0 0 0 0 0.93  0 0 0 0 0.90  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+      linear-gradient(180deg,#f5f2ea 0%, #e9e5db 40%, #efece4 75%, #ddd8cc 100%);
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.22), inset 0 -2px 6px rgba(0,0,0,.12);
+  }
+  /* sokkels raken elkaar; ovaal ligt er vrij bovenop */
+  .gl2 .keys{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    border:1px solid rgba(0,0,0,.10); border-radius:4px; overflow:hidden;
+    background:rgba(0,0,0,.06);
+  }
+  .gl2 .k{
+    position:relative; border:none; cursor:pointer;
+    aspect-ratio:1/1;
+    font-family:'Times New Roman',Times,serif; font-size:15px; font-weight:bold;
+    background:linear-gradient(180deg,#3a3d42 0%, #232629 60%, #191b1e 100%);
+    box-shadow:inset -1px -1px 2px rgba(0,0,0,.5), inset 1px 1px 1px rgba(255,255,255,.14);
+    display:flex; align-items:center; justify-content:center; padding:0;
+    color:#33322e; transition:filter .1s;
+  }
+  .gl2 .k::before{
+    content:""; position:absolute; inset:12% 14%;
+    border-radius:50%;
+    background:linear-gradient(180deg,#fbfaf5 0%, #ece9df 55%, #d8d4c6 100%);
+    box-shadow:0 2px 2px rgba(40,32,18,.45), 0 4px 5px rgba(40,32,18,.22),
+               inset 0 1px 1px rgba(255,255,255,.95), inset 0 -3px 5px rgba(0,0,0,.15);
+    pointer-events:none; transition:transform .05s ease, box-shadow .05s ease;
+  }
+  .gl2 .k:active::before{
+    transform:translateY(1px);
+    box-shadow:0 1px 1px rgba(40,32,18,.4), inset 0 2px 5px rgba(0,0,0,.25),
+               inset 0 1px 1px rgba(255,255,255,.5);
+  }
+  .gl2 .k span{ position:relative; z-index:1; }
+  .gl2 .k.mem{ background:linear-gradient(180deg,#8c2114 0%, #5c150b 100%); }
+  .gl2 .k.mem::before{
+    background:linear-gradient(180deg,#ec6a4f 0%, #c03c26 55%, #8c2114 100%);
+    box-shadow:0 2px 2px rgba(50,10,4,.5), 0 4px 5px rgba(50,10,4,.25),
+               inset 0 1px 1px rgba(255,255,255,.55), inset 0 -3px 5px rgba(0,0,0,.35);
+  }
+  .gl2 .k.mem span{ color:#fff; font-size:13px; }
+  .gl2 .k.op{ background:linear-gradient(180deg,#2a5c94 0%, #1c3f6b 100%); }
+  .gl2 .k.op::before{
+    background:linear-gradient(180deg,#82b5e4 0%, #4a83c4 55%, #2a5c94 100%);
+    box-shadow:0 2px 2px rgba(8,18,40,.5), 0 4px 5px rgba(8,18,40,.22),
+               inset 0 1px 1px rgba(255,255,255,.45), inset 0 -3px 5px rgba(0,0,0,.3);
+  }
+  .gl2 .k.op span{ color:#fff; font-size:16px; }
+  .gl2 .k.eq{ background:linear-gradient(180deg,#a97c26 0%, #7a5714 100%); }
+  .gl2 .k.eq::before{
+    background:linear-gradient(180deg,#ffd98c 0%, #dfa94b 55%, #a97c26 100%);
+    box-shadow:0 2px 2px rgba(45,30,10,.5), 0 4px 5px rgba(45,30,10,.22),
+               inset 0 1px 1px rgba(255,255,255,.6), inset 0 -3px 5px rgba(0,0,0,.3);
+  }
+  .gl2 .k.eq span{ color:#4a3410; font-size:17px; }
+  .gl2 .k.blank{ cursor:default; }
+  .gl2 .k.blank::before{ background:linear-gradient(180deg,#2c2f33 0%, #1b1d20 100%);
+    box-shadow:inset -1px -1px 2px rgba(0,0,0,.4), inset 1px 1px 1px rgba(255,255,255,.08); }
+  .gl2 .g2-wordmark{
+    text-align:center; margin-top:10px;
+    font-size:15px; font-style:italic; font-weight:bold; letter-spacing:2px;
+    color:#7d786b; text-shadow:0 1px 0 rgba(255,255,255,.55);
+  }
+  .deck.off .gl2 .g2-memtag{ opacity:0 !important; }
