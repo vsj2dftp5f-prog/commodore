@@ -938,6 +938,14 @@
         d.title = 'gooi deze regel weg (twee keer tikken)';
         b.appendChild(d);
       }
+      if(!b.querySelector(':scope > .grip')){
+        const g = document.createElement('button');
+        g.className = 'grip';
+        g.type = 'button';
+        g.setAttribute('contenteditable','false');
+        g.title = 'pak deze regel op om hem te herschikken';
+        b.appendChild(g);
+      }
     });
   }
   decorate();
@@ -993,7 +1001,7 @@
   // flatten a pad block to plain text, pens and all
   function blockText(block){
     const clone = block.cloneNode(true);
-    clone.querySelectorAll('.tear,.del').forEach(function(x){ x.remove(); });
+    clone.querySelectorAll('.tear,.del,.grip').forEach(function(x){ x.remove(); });
     clone.querySelectorAll('.cmt').forEach(function(c){
       c.replaceWith('\n✎ ' + c.textContent);
     });
@@ -1075,6 +1083,7 @@
     if(ae && block.contains(ae)) return;          // busy writing → leave it
     downBlock = block; downPt = {x:e.clientX, y:e.clientY};
     clearTimeout(hold);
+    if(e.target.closest('.grip')){ startPick(); return; }   // ⠿ pakt meteen
     hold = setTimeout(startPick, 280);
   });
 
@@ -1083,7 +1092,7 @@
     const block = downBlock;
     const r = block.getBoundingClientRect();
     const g = block.cloneNode(true);
-    g.querySelectorAll('.tear,.del').forEach(function(x){ x.remove(); });
+    g.querySelectorAll('.tear,.del,.grip').forEach(function(x){ x.remove(); });
     g.removeAttribute('contenteditable');
     g.classList.add('drag-ghost');
     g.style.width = Math.max(120, r.width) + 'px';

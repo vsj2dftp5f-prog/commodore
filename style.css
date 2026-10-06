@@ -819,8 +819,24 @@
     outline:2px dashed #b5562a; outline-offset:2px;
     background:rgba(181,86,42,.08);
   }
-  #history.selecting .picked::after{ content:"  ☑"; color:#b5562a; }
-  #history.selecting > div:not(.picked):not(.empty)::after{
-    content:"  ☐"; color:#9a6b2f; opacity:.55;
+  /* schuif het vinkvlak de marge in: links van de rode lijn */
+  #history.selecting{ margin-left:-32px; padding-left:32px; }
+  #history.selecting > div:not(.empty)::after{
+    content:"☐"; position:absolute; left:-24px; top:0;
+    width:22px; text-align:center; color:#9a6b2f; opacity:.55;
   }
+  #history.selecting .picked::after{ content:"☑"; color:#b5562a; opacity:1; }
+
+  /* ⠿ greep: regel direct oppakken om te herschikken */
+  #history .grip{
+    position:absolute; top:2px; right:66px; z-index:3;
+    font-family:'Times New Roman',Times,serif; font-size:13px; line-height:1;
+    color:#9a6b2f; background:rgba(255,255,255,.75);
+    border:1px solid #d4cdb6; border-radius:5px; padding:3px 7px;
+    cursor:grab; opacity:0; transition:opacity .15s;
+  }
+  #history .grip::before{ content:"⠿"; }
+  #history > div:hover > .grip{ opacity:1; }
+  @media (hover:none){ #history .grip{ opacity:.35; } }
+  #history.selecting .grip{ display:none; }
   #padSelect.armed{ color:#b5562a; background:#fff2ee; border-color:#e7a9a0; }
